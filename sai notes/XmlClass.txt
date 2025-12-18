@@ -1,0 +1,144 @@
+XML Support
+---------------
+1. Extensible markup language
+2. Xml was designed to describe the data
+3. Xml tags are not predefined in xml, we must define our own tags
+4. Xml is self describing
+5. Every element in xml is case sensitive and properly nested (Opening and closing tag must be same)
+Example
+---------
+
+<Account>
+<Name>Sai</Name>
+<Rating>Hot</Rating>
+</Account>
+
+Json 
+---------
+1.Json class is present under system Namespace
+2. System.JSON class to perform round-trip JSON serialization and deserialization of Apex objects.
+
+JSON Methods
+-----------------
+createGenerator(prettyPrint)
+
+createParser(jsonString)
+
+deserialize(jsonString, apexType)
+
+deserializeStrict(jsonString, apexType)
+
+deserializeUntyped(jsonString)
+
+serialize(objectToSerialize)
+
+serialize(objectToSerialize, suppressApexObjectNulls)
+
+serializePretty(objectToSerialize)
+
+serializePretty(objectToSerialize, suppressApexObjectNulls)
+
+Xml
+------
+1.DOM classes  is present under Dom Namespace
+
+
+DOM(Document object Model)
+---------------------------
+Dom namespace contains classes using which we can parse or generate xml content. 
+
+
+Dom Namespace contains the following classes
+
+1. Document
+2. XMLNode
+
+
+
+
+<?xml version="1.0" encoding="UTF-8"?>
+<Employee>
+  <Name>
+    <FirstName>Sai</FirstName>
+    <LastName>Prakash</LastName>
+ </Name>
+<Age>24</Age>
+<City/>
+</Employee>
+
+Create Xml
+----------------
+
+public class XmlExample1 {
+
+    public String result {set;get;}
+    public XmlExample1(){
+        Dom.Document doc=new Dom.Document();
+       Dom.XmlNode root=doc.createRootElement('Employee', null, null);
+       Dom.XmlNode name= root.addChildElement('Name', null, null);
+       Dom.XmlNode firstName= name.addChildElement('FirstName', null, null);
+        firstName.addTextNode('Sai');
+        Dom.XmlNode lastName=name.addChildElement('LastName', null, null);
+        lastName.addTextNode('Prakash');
+        lastName.setAttribute('MySurName','Voleti');
+       Dom.XmlNode age=root.addChildElement('Age',  null, null);
+        age.addCommentNode('This is current Age');
+        age.addTextNode('24');
+        root.addChildElement('City',  null, null);
+        result=doc.toXmlString();
+        system.debug('result='+result);
+        /*
+<?xml version="1.0" encoding="UTF-8"?>
+<Employee>
+       <Name>
+          <FirstName>sai</FirstName>
+          <LastName MySurName="Voleti">Prakash</LastName>
+       </Name>
+       <Age> <!--This is current Age--> 24</Age>
+     <city/>
+</Employee>
+
+
+
+*/
+    }
+}
+Execute anynomous window
+---------------------------
+
+new XmlExample1();
+
+
+Parse Xml
+------------------
+
+public class DeserailzeXML {
+    public static String parsedXMLStr{get;set;}
+    public static void xmlParser(){
+        XmlExample1 xmlEx=new XmlExample1();
+        system.debug('result='+xmlEx.result);
+        Dom.Document doc=new Dom.Document();
+        doc.load(xmlEx.result);
+        Dom.XmlNode rootElement= doc.getRootElement();
+        system.debug('root='+rootElement.getName());
+        List<Dom.XmlNode> childsofRoot=rootElement.getChildElements();
+        for(Dom.XmlNode childElement:childsofRoot){
+            system.debug('getName='+childElement.getName());
+        }
+        parsedXMLStr='';
+       Dom.XmlNode nameChild=rootElement.getChildElement('Name', null);
+        List<Dom.XmlNode> childsofName=nameChild.getChildElements();
+         for(Dom.XmlNode childElement:childsofName){
+             parsedXMLStr=parsedXMLStr+childElement.getName()+' : '+childElement.getText()+' ';
+            //system.debug('getName='+childElement.getName()+', Get Text='+childElement.getText());
+        }
+        system.debug('parsedXMLStr='+parsedXMLStr);
+    }
+}
+
+Execute anynomous window
+---------------------------
+
+
+DeserailzeXML.xmlParser();
+

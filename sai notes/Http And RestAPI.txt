@@ -1,0 +1,1131 @@
+Http Protocol(Hypertext Transfer Protocol)
+------------
+It is a set of rules between two parties used in the communication
+
+HTTP, TCP, IP, FTP, SMTP
+URL
+---
+URL is an acronym for Uniform Resource Locator and is a reference 
+(an address) to a resource on the Internet. ... Protocol identifier: 
+For the URL http://example.com , the protocol identifier is http . Resource name: 
+For the URL http://example.com , the resource name is example.com .
+
+
+Port number is used to communicate to other system. If we dont specify the port number then default
+port number is taken
+
+http - 80
+https - 443
+smtp - 25
+ssh - 22
+
+
+syntax - protocol://hostname:portNumber/pathofResource
+
+Ex - https://www.example.com:80/myFolder/myfile.html
+
+
+
+Http Class
+----------
+Use the Http class to initiate an HTTP request and response.
+
+Namespace
+System
+
+Http Methods
+The following are methods for Http. All are instance methods.
+
+send(request)
+Sends an HttpRequest and returns the response.
+toString()
+Returns a string that displays and identifies the object's properties.
+
+
+
+HttpRequest Class
+------------------
+Use the HttpRequest class to programmatically create HTTP requests like GET, POST, PATCH, PUT, and DELETE.
+Namespace
+System
+
+Usage
+Use the XML classes or JSON classes to parse XML or JSON content in the body of a request created by HttpRequest.
+
+HttpRequest Methods
+The following are methods for HttpRequest. All are instance methods.
+
+getBody()
+Retrieves the body of this request.
+getBodyAsBlob()
+Retrieves the body of this request as a Blob.
+getBodyDocument()
+Retrieves the body of this request as a DOM document.
+getCompressed()
+If true, the request body is compressed, false otherwise.
+getEndpoint()
+Retrieves the URL for the endpoint of the external server for this request.
+getHeader(key)
+Retrieves the contents of the request header.
+getMethod()
+Returns the type of method used by HttpRequest.
+setBody(body)
+Sets the contents of the body for this request.
+setBodyAsBlob(body)
+Sets the contents of the body for this request using a Blob.
+setBodyDocument(document)
+Sets the contents of the body for this request. The contents represent a DOM document.
+setClientCertificate(clientCert, password)
+This method is deprecated. Use setClientCertificateName instead.
+setClientCertificateName(certDevName)
+If the external service requires a client certificate for authentication, set the certificate name.
+setCompressed(flag)
+If true, the data in the body is delivered to the endpoint in the gzip compressed format. If false, no compression format is used.
+setEndpoint(endpoint)
+Specifies the endpoint for this request.
+setHeader(key, value)
+Sets the contents of the request header.
+setMethod(method)
+Sets the type of method to be used for the HTTP request.
+setTimeout(timeout)
+Sets a timeout for the request between 1 and 120,000 milliseconds. The timeout is the maximum time to wait for establishing the HTTP connection. The same timeout is used for waiting for the request to start. When the request is executing, such as retrieving or posting data, the connection is kept alive until the request finishes.
+toString()
+Returns a string containing the URL for the endpoint of the external server for this request and the method used, for example, Endpoint=http://YourServer, Method=POST
+
+
+HttpResponse Class
+--------------------
+Use the HttpResponse class to handle the HTTP response returned by the Http class.
+Namespace
+System
+
+Usage
+Use the XML classes or JSON Classes to parse XML or JSON content in the body of a response accessed by HttpResponse.
+
+
+HttpResponse Methods
+The following are methods for HttpResponse. All are instance methods.
+
+getBody()
+Retrieves the body returned in the response.
+getBodyAsBlob()
+Retrieves the body returned in the response as a Blob.
+getBodyDocument()
+Retrieves the body returned in the response as a DOM document.
+getHeader(key)
+Retrieves the contents of the response header.
+getHeaderKeys()
+Retrieves an array of header keys returned in the response.
+getStatus()
+Retrieves the status message returned for the response.
+getStatusCode()
+Retrieves the value of the status code returned in the response.
+getXmlStreamReader()
+Returns an XmlStreamReader that parses the body of the callout response.
+setBody(body)
+Specifies the body returned in the response.
+setBodyAsBlob(body)
+Specifies the body returned in the response using a Blob.
+setHeader(key, value)
+Specifies the contents of the response header.
+setStatus(status)
+Specifies the status message returned in the response.
+setStatusCode(statusCode)
+Specifies the value of the status code returned in the response.
+toString()
+Returns the status message and status code returned in the response, for example:
+
+
+
+
+
+public class Http_Ip_Tracing {
+
+    //Endpoint : http://en.utrace.de/?query=175.101.107.170
+    //Method : Get
+    //Authentication: No
+    
+    public void trace(){
+        Http hp=new Http();
+        HttpRequest req=new HttpRequest();
+        Map<String,String> resMap=new Map<String,String>();
+        String endpoint='http://en.utrace.de/?query=175.101.107.170';
+        req.setEndpoint(endpoint);
+        req.setMethod('GET');
+        HttpResponse res=hp.send(req);
+        system.debug('getHeaderKeys= '+res.getHeaderKeys());
+        List<String> headerKeys=res.getHeaderKeys();
+        for(String headerKey:headerKeys){
+            //system.debug('header Value='+res.getHeader(headerKey));
+            resMap.put(headerKey,res.getHeader(headerKey));
+        }
+        for(String headkey:resMap.keySet())
+        {
+            system.debug(headkey+' = '+resMap.get(headkey));
+        }
+        String result=res.getBody();
+        
+        system.debug('getStatus= '+res.getStatus());
+        system.debug('getStatusCode= '+res.getStatusCode());
+        system.debug('getXmlStreamReader= '+res.getXmlStreamReader());
+    }
+}
+
+
+Exposing Apex Classes as REST Web Services
+-------------------------------------------
+You can expose your Apex classes and methods so that external applications 
+can access your code and your application through the REST architecture.
+
+
+Rest Context
+--------------
+1. This is a standard class defined in salesforce
+2. It is defined under system namespace
+3. This class contains the RestRequest and RestResponse objects
+
+RestRequest
+--------------
+1. This is a standard class and defined under system namespace
+2. This class contains all the data about the rest request message in Http request
+
+RestRequest Properties
+The following are properties for RestRequest.
+
+Note
+
+While the RestRequest List and Map properties are read-only, their contents are read-write.
+You can modify them by calling the collection methods directly or you can use of the associated RestRequest 
+methods shown in the previous table.
+
+headers
+Returns the headers that are received by the request.
+returns the Map<String,String>
+
+httpMethod
+Returns one of the supported HTTP request methods.
+Type : String
+Values: GET, PUT, POST, PATCH, DELETE, HEAD
+
+
+params
+Returns the parameters that are received by the request.
+
+Map<String,String>
+
+remoteAddress
+Returns the IP address of the client making the request.
+
+requestBody
+Returns or sets the body of the request.
+requestURI
+------------
+Returns or sets everything after the host in the HTTP request string.
+
+
+For example, if the request string is https://instance.salesforce.com/services/apexrest/Account/ then the requestURI is /Account/.
+
+resourcePath
+Returns the REST resource path for the request
+
+For example, if the Apex REST class defines a urlMapping of /MyResource/*,
+ the resourcePath property returns /services/apexrest/MyResource/*.
+
+@RestResource(urlMapping='/DisplayMessage/*')
+global with sharing class RestContextMessage {
+
+    @HttpGet
+    global static String getMessage(){
+       RestRequest req=RestContext.request;
+       RestResponse res= RestContext.response;
+        system.debug('headers='+req.headers);
+        return 'Connection succesful';
+        
+        
+    }    
+    
+}
+
+
+1. Go to Workbench in web browser
+2. URL - https://workbench.developerforce.com/login.php
+3. login with credentials -> Utilities ->Rest Explorer -> Select Method "GET"
+4. Set endpoint url - /services/apexrest/DisplayMessage
+
+
+@RestResource(urlMapping='/DisplayMessage/*')
+global with sharing class RestContextMessage {
+   @HttpGet
+    global static Account doGet() {
+        RestRequest req = RestContext.request;
+        RestResponse res = RestContext.response;
+        system.debug('requestURI='+req.requestURI);
+        system.debug('headers='+req.headers );
+        system.debug('httpMethod='+req.httpMethod );
+        system.debug('remoteAddress='+req.remoteAddress);
+        system.debug('requestBody='+req.requestBody );
+        system.debug('resourcePath='+req.resourcePath );        
+        String accountId = req.requestURI.substring(req.requestURI.lastIndexOf('/')+1);
+        Account result = [SELECT Id, Name, Phone, Website FROM Account WHERE Id = :accountId];
+        return result;
+    }
+    
+}
+
+
+1. Go to Workbench in web browser
+2. URL - https://workbench.developerforce.com/login.php
+3. login with credentials -> Utilities ->Rest Explorer -> Select Method "GET"
+4. Set endpoint url - /services/apexrest/DisplayMessage/0010o00002jaIU2AAM
+
+
+
+
+@RestResource(urlMapping='/MyContact/v1/*')
+global class ContactHandler {
+    
+    @HttpPost
+    global  static String createContact(String firstName,String lastName,String Phone){
+        String result;
+        system.JSONGenerator js= JSON.createGenerator(true);
+        js.writeStartObject();
+        
+        try{
+            Contact con=new Contact();
+            con.FirstName=firstName;
+            con.LastName=lastName;
+            con.Phone=Phone;
+            insert con;
+            
+            js.writeStringField('Status','Success');
+            js.writeStringField('Id',con.Id);
+            js.writeObjectField('Contact',con);
+            
+        }
+        catch(Exception e){
+            js.writeStringField('Status','Failed');
+            js.writeStringField('ErrorMessage',e.getMessage());
+        }
+        js.writeEndObject();
+        result=js.getAsString();
+        return result;
+        
+    }
+}
+
+
+
+
+1. Go to Workbench in web browser
+2. URL - https://workbench.developerforce.com/login.php
+3. login with credentials -> Utilities ->Rest Explorer -> Select Method "POST"
+4. Set endpoint url - /services/apexrest/MyContact/v1
+5. Request Body - 
+{
+"firstName":"Sai",
+"lastName":"Nath Reddy",
+"Phone":"12345456678"
+}	
+
+
+Output
+---------
+
+"{\n  \"Status\" : \"Success\",\n  \"Id\" : \"0030o00003Vhdb9AAB\",\n  \"Contact\" : {\n 
+   \"attributes\" : {\n      \"type\" : \"Contact\",\n      \"url\" :
+ \"/services/data/v52.0/sobjects/Contact/0030o00003Vhdb9AAB\"\n    },\n  
+  \"FirstName\" : \"Sai\",\n    \"LastName\" : \"Nath Reddy\",\n   
+ \"Phone\" : \"12345456678\",\n    \"Id\" : \"0030o00003Vhdb9AAB\"\n  }\n}"
+
+
+1. Go to Workbench in web browser
+2. URL - https://workbench.developerforce.com/login.php
+3. login with credentials -> Utilities ->Rest Explorer -> Select Method "POST"
+4. Set endpoint url - /services/apexrest/MyContact/v1
+5. Request Body - 
+{
+"firstName":"krishna",
+"lastName":"",
+"Phone":"12345456678"
+}
+
+Output
+---------
+
+
+
+"{\n  \"Status\" : \"Failed\",\n  \"ErrorMessage\" : \"Insert failed. 
+First exception on row 0; first error: REQUIRED_FIELD_MISSING, Required fields 
+are missing: [LastName]: [LastName]\"\n}"
+
+
+@RestResource(urlMapping='/MyContact/v1/*')
+global class ContactHandler {
+    
+   
+    @HttpPatch
+    global static String updateContact(String firstName){
+        String result;
+        Boolean isValidContact=false;
+        RestRequest req=RestContext.request;
+        RestResponse res=RestContext.response;
+        Map<String,String> inputs=req.params;
+        
+        String contactId=inputs.get('contactId');
+        String Phone=inputs.get('myPhone');
+        
+        system.debug('contactId='+contactId);
+        system.JSONGenerator js= JSON.createGenerator(true);
+        js.writeStartObject();
+        
+        try{
+            if(contactId!=null && contactId!=''){
+                
+                Contact con=[SELECT Id, FirstName, LastName,Phone FROM Contact where Id=:contactId];
+                if(con!=null){                    
+                    con.FirstName=firstName;
+                    con.Phone=Phone;
+                    update con;
+                    js.writeStringField('Status','Contact Successfully updated');
+                    js.writeStringField('Id',con.Id);
+                    js.writeObjectField('Contact',con);
+                    isValidContact=true;
+                    
+                }
+            }
+            if(!isValidContact){
+                js.writeStringField('Status','Not a valid contact Id');
+            }
+            
+        }
+        catch(Exception e){
+            js.writeStringField('Status','Failed');
+            js.writeStringField('ErrorMessage',e.getMessage());
+        }
+        js.writeEndObject();
+        result=js.getAsString();
+        return result;
+        
+    }
+}
+
+
+1. Go to Workbench in web browser
+2. URL - https://workbench.developerforce.com/login.php
+3. login with credentials -> Utilities ->Rest Explorer -> Select Method "PATCH"
+4. Set endpoint url - /services/apexrest/MyContact/v1?contactId=0030o00003Vhdb9AAB&myPhone=987654321
+
+5. Request Body - 
+{
+"firstName":"basha"
+}
+
+Output
+---------
+"{\n  \"Status\" : \"Contact Successfully updated\",\n  \"Id\" :
+ \"0030o00003Vhdb9AAB\",\n  \"Contact\" : {\n    \"attributes\" :
+ {\n      \"type\" : \"Contact\",\n    
+  \"url\" : \"/services/data/v52.0/sobjects/Contact/0030o00003Vhdb9AAB\"\n    },\n 
+   \"Id\" : \"0030o00003Vhdb9AAB\",\n    \"FirstName\" : \"basha\",\n  
+  \"LastName\" : \"Nath Reddy\",\n    \"Phone\" : \"987654321\"\n  }\n}"
+
+
+
+
+
+
+    @HttpPut
+    global static String upsertContact(String firstName,String lastName,String contactId,String myPhone){
+        String result;
+        Boolean isValidContact=false;
+        system.JSONGenerator js= JSON.createGenerator(true);
+        js.writeStartObject();
+        try{
+            Contact con=new Contact();
+            con.Id=contactId;
+            con.FirstName=firstName;
+            con.LastName=lastName;
+            con.Phone=myPhone;
+            upsert con;
+            js.writeStringField('Status','Contact saved successfully');
+            js.writeStringField('Id',con.Id);
+            js.writeObjectField('Contact',con);
+            isValidContact=true;
+            
+        }
+        catch(Exception e){
+            js.writeStringField('Status','Failed');
+            js.writeStringField('ErrorMessage',e.getMessage());
+        }
+        js.writeEndObject();
+        result=js.getAsString();
+        return result;
+        
+    }
+
+
+1. Go to Workbench in web browser
+2. URL - https://workbench.developerforce.com/login.php
+3. login with credentials -> Utilities ->Rest Explorer -> Select Method "PUT"
+4. Set endpoint url - /services/apexrest/MyContact/v1
+
+5. Request Body - 
+{
+"contactId":"0030o00003Vhdb9AAB",
+"firstName":"krishna",
+"lastName":"Nath Reddy",
+"myPhone":"12345456678"
+}
+
+It will update the record based on contact Id
+
+Output
+---------
+"{\n  \"Status\" : \"Contact saved successfully\",\n  
+\"Id\" : \"0030o00003Vhdb9AAB\",\n  \"Contact\" : 
+{\n    \"attributes\" : {\n      \"type\" : \"Contact\",\n  
+    \"url\" : \"/services/data/v52.0/sobjects/Contact/0030o00003Vhdb9AAB\"\n 
+   },\n    \"Id\" : \"0030o00003Vhdb9AAB\",\n    \"FirstName\" :
+ \"krishna\",\n    \"LastName\" : \"Nath Reddy\",\n    \"Phone\" : \"12345456678\"\n  }\n}"
+
+1. Go to Workbench in web browser
+2. URL - https://workbench.developerforce.com/login.php
+3. login with credentials -> Utilities ->Rest Explorer -> Select Method "PUT"
+4. Set endpoint url - /services/apexrest/MyContact/v1
+
+5. Request Body - 
+
+{
+
+"firstName":"SREE ",
+"lastName":"krishna BABU",
+"myPhone":"12345456678"
+}
+It will inserted new record
+
+Output
+---------------
+"{\n  \"Status\" : \"Contact saved successfully\",\n 
+ \"Id\" : \"0030o00003VhdgnAAB\",\n  \"Contact\" :
+ {\n    \"attributes\" : {\n      \"type\" : \"Contact\",\n    
+  \"url\" : \"/services/data/v52.0/sobjects/Contact/0030o00003VhdgnAAB\"\n  
+  },\n    \"Id\" : \"0030o00003VhdgnAAB\",\n   
+ \"FirstName\" : \"SREE \",\n    \"LastName\" : \"krishna BABU\",\n 
+   \"Phone\" : \"12345456678\"\n  }\n}"
+
+
+@HttpDelete
+    global  static String deleteContact(){
+        String result;
+        RestRequest req=RestContext.request;
+        RestResponse res=RestContext.response;
+        Map<String,String> inputs=req.params;
+        Id deletedContactId;
+        String firstName=inputs.get('firstName');
+        system.JSONGenerator js= JSON.createGenerator(true);
+        js.writeStartObject();
+        
+        try{
+            if(firstName!=null && firstName!=''){
+                Contact con=[SELECT Id FROM Contact where FirstName=:firstName limit 1];
+                deletedContactId=con.Id;
+                delete con;
+                js.writeStringField('Status','Deleted Successfully');
+                js.writeStringField('Id',deletedContactId);
+                js.writeObjectField('Contact',con);
+            }
+            
+        }
+        catch(Exception e){
+            js.writeStringField('Status','Failed');
+            js.writeStringField('ErrorMessage',e.getMessage());
+        }
+        js.writeEndObject();
+        result=js.getAsString();
+        system.debug('statusCode='+res.statusCode);
+        system.debug('headers='+res.headers);
+        return result;
+        
+    }
+
+1. Go to Workbench in web browser
+2. URL - https://workbench.developerforce.com/login.php
+3. login with credentials -> Utilities ->Rest Explorer -> Select Method "DELETE"
+4. Set endpoint url - /services/apexrest/MyContact/v1?firstName=SREE
+
+Output
+-------
+"{\n  \"Status\" : \"Deleted Successfully\",\n  \"Id\" :
+ \"0030o00003Vhda6AAB\",\n  \"Contact\" : {\n    \"attributes\" : 
+{\n      \"type\" : \"Contact\",\n    
+  \"url\" : \"/services/data/v52.0/sobjects/Contact/0030o00003Vhda6AAB\"\n  
+  },\n    \"Id\" : \"0030o00003Vhda6AAB\"\n  }\n}"
+
+Rest Resource Example
+----------------------------
+@RestResource(urlMapping='/contactURI/*')
+ global class ContactResource {
+     global class ResponseWrapper {
+        String status;
+        String message;
+    }
+      // Creating a response wrapper class
+   
+  @httpGet
+    global static List<Contact> getContact(){
+        List<Contact> conList=new List<Contact>();
+        RestRequest req=RestContext.request;
+        RestResponse res=RestContext.response;
+        String contactRequest= req.requestURI;
+        system.debug('contactRequest='+contactRequest);
+        String ContactName=contactRequest.substring(contactRequest.lastIndexOf('/') + 1);
+        ContactName=ContactName.replace('+', ' ');
+        system.debug('ContactName='+ContactName);
+        if(ContactName!=null){
+            conList=[Select Id, Name from Contact where Name like :ContactName];
+        }
+        system.debug('conList='+conList);
+        return conList;
+    }
+    @HTTPPost
+    global static contact createContact(String firstName,String LastName,String Phone){
+        Contact con=new Contact();
+        con.FirstName=firstName;
+        con.LastName=LastName;
+        con.Phone=Phone;
+        try{
+            insert con;
+            return con;
+        }
+        catch(Exception e){
+            return con;
+        }
+    }
+   /* @HTTPPatch
+    global static contact updateContact(String LastName, String Phone){
+        RestRequest req=RestContext.request;
+        RestResponse res=RestContext.response;
+        String contactRequest= req.requestURI;
+        Map<String,String> reqParams=req.params;
+        Contact con=new Contact();
+        String ContactId=reqParams.get('contactId');
+        if(ContactId!=null || ContactId!=''){
+            // Method - 1 
+             //con=[Select Id,LastName,Phone from Contact where Id=:ContactId];
+            //con.LastName=LastName;
+            //con.Phone=Phone;
+            //update con;
+            //Method - 2 
+             con.Id=ContactId;
+            con.LastName=LastName;
+            con.Phone=Phone;
+            update con;
+            
+        }
+        return con;
+    }
+*/
+    @HTTPPatch
+    global static contact updateContact(){
+        RestRequest req=RestContext.request;
+        RestResponse res=RestContext.response;
+        String contactRequest= req.requestURI;
+        system.debug('contactRequest='+contactRequest);
+        Map<String,String> reqParams=req.params;
+        system.debug('req.params='+req.params);
+        for(String reqparam:reqParams.keySet()){
+            system.debug('reqparam key='+reqparam);
+            system.debug('reqparam value='+reqParams.get(reqparam));
+            
+        }
+        Contact con=new Contact();
+        String ContactId=reqParams.get('contactId');
+        system.debug('ContactId='+ContactId);
+        if(ContactId!=null || ContactId!=''){
+            /* Method - 3 */
+            system.debug('req.requestBody='+req.requestBody);
+            String requestBody=req.requestBody.toString(); 
+            con=(Contact)JSON.deserialize(requestBody, Contact.class);
+            con.Id=ContactId;
+            system.debug('con da='+con);
+            update con;
+        }
+        return con;
+    }
+    @HTTPPut
+    global Static Contact UpsertContact(String FirstName,String LastName){
+        RestRequest req=RestContext.request;
+        RestResponse res=RestContext.response;
+        String contactRequest= req.requestURI;
+        Map<String,String> reqParams=req.params;
+        String ContactId=reqParams.get('contactId');
+        Contact con=new Contact();
+        if(String.isNotEmpty(ContactId)){
+            con.Id=ContactId;
+        }
+        con.FirstName=FirstName;
+        con.LastName=LastName;
+        try{
+            upsert con;
+            return con;
+        }
+        catch(Exception e){
+            return con;
+        }
+        
+    }
+   /* @HTTPDelete
+    global static Map<String, String> deleteContact() {
+        // Initializing the response map
+        Map<String, String> responseMap = new Map<String, String>();
+        // Initializing the request parameter with the incoming request
+        RestRequest req = RestContext.request;
+        // Getting the request URI
+        Map<String,String> contactRequestParams =req.params;
+        String ContactId=contactRequestParams.get('contactId');
+        // Initializing contact to delete
+        Contact contact = new Contact(Id=contactId);
+        // Deleting contact
+        try {
+            delete contact;
+            responseMap.put('success', '1');
+            responseMap.put('message', 'Record Deleted Successfully');
+        } catch(DmlException ex) {
+            responseMap.put('Failure', '0');
+            responseMap.put('message', ex.getMessage());
+        }
+        // Returning the response map in the response
+        return responseMap;
+    }
+    */
+    @HTTPDelete
+    global static List<ResponseWrapper> deleteContact() {
+        // Initializing the response map
+        List<Id> deleteContactIds=new List<Id>();
+        List<Contact> deleteContacts=new List<Contact>();
+        List<ResponseWrapper> resWrapperList=new List<ResponseWrapper>();
+        Map<String, String> responseMap = new Map<String, String>();
+        // Initializing the request parameter with the incoming request
+        RestRequest req = RestContext.request;
+        // Getting the request URI
+        Map<String,String> contactRequestParams =req.params;
+        //system.debug('contactId1='+contactRequestParams.get('contactId1'));
+        deleteContactIds.add(Id.valueOf(contactRequestParams.get('contactId1')));
+        deleteContactIds.add(Id.valueOf(contactRequestParams.get('contactId2')));
+        deleteContactIds.add(Id.valueOf(contactRequestParams.get('contactId3')));
+        // Initializing contact to delete
+        for(Id ConId:deleteContactIds){
+            deleteContacts.add(new Contact(Id=ConId));
+        }
+            
+        // Deleting contact
+        
+            if(!deleteContacts.isEmpty()){
+                Database.DeleteResult[] deleteResults= Database.delete(deleteContacts, false); 
+                for(Database.DeleteResult delResult:deleteResults){
+                    ResponseWrapper wrapper = new ResponseWrapper();
+                    if(delResult.isSuccess()){
+                        wrapper.status='Success';
+                        wrapper.message='Record Deleted sucessfully '+delResult.getId();
+                    }
+                    else
+                    {
+                        for(Database.Error error:delResult.getErrors()){
+                            wrapper.status='Error';
+                            wrapper.message='error Fields='+error.getFields()+ 'Message is= '+ error.getMessage();
+                        }
+                    }
+                    resWrapperList.add(wrapper);
+                }
+            }
+        // Returning the response map in the response
+        return resWrapperList;
+    }
+      
+}
+
+Test Class
+----------------
+@isTest
+private class ContactResourceTest {
+    @TestSetup static void MyTestMethod(){
+        Contact contactTest = new Contact(FirstName='Richard', LastName='Hendricks');
+        insert contactTest;
+    }
+    
+
+    @isTest static void getContact_Test(){
+        RestRequest req=new RestRequest();
+        req.requestURI='/services/apexrest/contactURI/Richard+Hendricks';
+        req.httpMethod='GET';
+        RestContext.request=req;
+        List<Contact> conList=ContactResource.getContact();
+        system.assert(conList.size()==1);
+        system.assertEquals('Richard Hendricks',conList[0].Name);
+    }
+     @isTest static void createContact_Test(){
+         contact con=ContactResource.createContact('My Test','King','1234456');
+         system.assert(con!=null);
+         Contact ExpectedCon=[select Id,FirstName from Contact where FirstName='My Test'];
+         system.assert(ExpectedCon!=null);
+         system.assertEquals(con.FirstName, ExpectedCon.FirstName);
+         contact con1=ContactResource.createContact('My Test-2','','1234456');
+     }
+     @isTest static void updateContact_Test(){
+     RestRequest req=new RestRequest();
+         Contact Con=[select Id,FirstName from Contact where FirstName='Richard'];
+         contact passCon=new contact(LastName='Tendulkar Good',Phone='81111111111');
+         req.requestURI='/services/apexrest/contactURI';
+         req.httpMethod='PATCH';
+         req.addHeader('Content-Type', 'application/json');
+         req.addHeader('Accept', 'application/json');
+         req.addParameter('contactId', Con.Id);
+         
+         req.requestBody=Blob.valueOf(JSON.serialize(passCon));
+         RestContext.request=req;
+         contact con2=ContactResource.updateContact();
+         system.assert(con2!=null);
+     }
+    @isTest static void upsertContact_Test(){
+        Contact Con=[select Id,FirstName from Contact where FirstName='Richard'];
+        RestRequest req=new RestRequest();
+        req.requestURI='/services/apexrest/contactURI';
+        req.addParameter('contactId',Con.Id);
+        req.httpMethod='PUT';
+        RestContext.request=req;
+        contact con2=ContactResource.UpsertContact('MY tEST 2','queen');
+        system.assert(con2!=null);
+        system.assertEquals('MY tEST 2', con2.FirstName);
+        //Negative Senario
+        contact con3=ContactResource.UpsertContact('MY tEST 2','');
+     }
+    @isTest static void deleteContact_Test(){
+        
+        List<Contact> conList=new List<Contact>();
+        conList.add(new Contact(FirstName='Richard-1', LastName='Hendricks-1'));
+        conList.add(new Contact(FirstName='Richard-2', LastName='Hendricks-2'));
+        conList.add(new Contact(FirstName='Richard-3', LastName='Hendricks-3'));
+        insert conList;
+        Account acc=new Account(Name='Test Account');
+        insert acc;
+        
+        RestRequest req=new RestRequest();
+        req.requestURI='/services/apexrest/contactURI';
+        req.httpMethod='DELETE';
+        req.addParameter('contactId1',conList[0].Id);
+        req.addParameter('contactId2',conList[1].Id);
+        req.addParameter('contactId3',conList[2].Id);
+        delete conList[2];
+        RestContext.request=req;
+        List<ContactResource.ResponseWrapper> resWrap=new List<ContactResource.ResponseWrapper>();
+        resWrap=ContactResource.deleteContact();
+        system.debug('resWrap='+resWrap);
+    }
+}
+
+
+1. Get Method
+
+url
+---------
+/services/apexrest/contactURI/John+Dodge
+
+
+2.  Post Method
+
+url
+---------
+/services/apexrest/contactURI
+
+Request Body
+---------------
+{
+"firstName":"Sachin",
+"LastName":"Tendulkar",
+"Phone":"12345456678"
+}
+
+3. Patch Method
+
+url
+---------
+/services/apexrest/contactURI?contactId=0030o00003ZZydlAAD
+
+Request Body
+---------------------
+{
+"LastName":"Tendulkar Good",
+"Phone":"81111111111"
+}	
+
+4. PUT Method
+with paramter
+---------------
+/services/apexrest/contactURI?contactId=0030o00003ZZydlAAD
+
+Request Body
+---------------
+{
+"FirstName":"Venkat",
+"LastName":"Dev Lead"
+}	
+
+with empty parameter value
+-----------------------------
+/services/apexrest/contactURI?contactId=
+
+Request Body
+-------------
+{
+"FirstName":"Venkat",
+"LastName":"Dev Lead"
+}	
+
+
+5. Delete method
+
+/services/apexrest/contactURI?contactId=0030o00003ZZydlAAD
+
+
+
+Convert JSON to Apex
+----------------------
+https://www.adminbooster.com/tool/json2apex
+
+
+Example 
+
+
+public class Future_Example {
+    @future(callout=true)
+    public static void callme(){
+        Http htp=new Http();
+        HttpRequest req=new HttpRequest();
+        req.setEndpoint('http://www.postalpincode.in/api/postoffice/Ameerpet');
+        req.setMethod('GET');
+        HttpResponse res=htp.send(req);
+        system.debug('status code='+res.getStatusCode()+'status ='+res.getStatus());
+        String jsonBody=res.getBody();
+        Map<String, Object> results =(Map<String,Object>)json.deserializeUntyped(jsonBody);
+        List<object> postofficeList=(List<Object>)results.get('PostOffice');
+        system.debug('postofficeList='+postofficeList);
+        String obj=json.serialize(postofficeList[0]);
+        
+        MyOffice obj2=(MyOffice)json.deserialize(obj, MyOffice.class);
+        system.debug('PINCode='+obj2.PINCode);
+        
+        
+    }
+    //Wrapper Class
+    Public class MyOffice
+    {
+        Public String name;
+        Public Integer PINCode;
+    }    
+    
+}
+
+
+1. create an account in this currency Layer - https://currencylayer.com
+2. get the access key
+3. Use the access key to make request to convert from source to expect currency
+4. store the Endpoint url into remote site settings
+
+public class CurrencyLayer {
+    
+    public static void fetchCurrency(){
+        String jsonString;
+        Decimal INRValue;
+        
+        Http hp=new Http();
+        
+        String accessKey='68c1ddeb39d19bc5ba3fe494a59a1936';
+        HttpRequest req=new HttpRequest();
+        String endpoint='http://apilayer.net/api/live?';
+        endpoint=endpoint+'access_key='+accessKey;
+        endpoint=endpoint+'&currencies=EUR,GBP,CAD,INR';
+        endpoint=endpoint+'&source=USD';
+        endpoint=endpoint+'&format=1';
+        req.setEndpoint(endpoint);
+        req.setMethod('GET');
+        HttpResponse res=hp.send(req);
+        if(res.getStatusCode()==200)
+        {
+            
+            system.debug('getStatus='+res.getStatus());
+            system.debug('getStatus='+res.getBody());   
+            jsonString=res.getBody();
+            System.JSONParser jp=JSON.createParser(jsonString);
+            while(jp.nextToken()!=null){
+                if(jp.getText()=='USDINR'){
+                    jp.nextToken();
+                   INRValue=(Decimal)jp.getDecimalValue();
+                }
+            }
+            
+            
+            List<PricebookEntry> pricebookEntries=[SELECT Id, Name, CurrencyIsoCode,INRValue__c, UnitPrice, ProductCode,
+                                                   Product2Id, Pricebook2Id FROM PricebookEntry where
+                                                   Pricebook2Id='01s0o00000Bd71MAAR' and CurrencyIsoCode='USD'];
+            for(PricebookEntry pb:pricebookEntries){
+                
+                pb.INRValue__c='RS '+(pb.UnitPrice*INRValue);
+            }
+            update pricebookEntries;
+            
+        }
+        
+    }
+}
+
+
+
+
+global class BatchCurrencyAPILayer implements Database.Batchable<sobject>,Database.AllowsCallouts{
+    global String accessKey;
+    global BatchCurrencyAPILayer(String accessKey){
+        this.accessKey=accessKey; 
+    }
+    global Database.QueryLocator start(Database.BatchableContext bc){
+        String pricebookId='01s0o00000Bd71MAAR';
+        String currencyCode='USD';
+        String query='SELECT Id, Name, CurrencyIsoCode,INRValue__c, UnitPrice, ProductCode,'+
+            'Product2Id, Pricebook2Id FROM PricebookEntry where'+
+            ' Pricebook2Id=:pricebookId and CurrencyIsoCode=:currencyCode';
+        system.debug('query='+query);
+        return Database.getQueryLocator(query);
+    }
+    global void execute(Database.BatchableContext bc,List<PricebookEntry> pricebookEntries){
+        String jsonString;
+        Decimal INRValue;
+        Http hp=new Http();
+        
+        HttpRequest req=new HttpRequest();
+        String endpoint='http://apilayer.net/api/live?';
+        endpoint=endpoint+'access_key='+accessKey;
+        endpoint=endpoint+'&currencies=EUR,GBP,CAD,INR';
+        endpoint=endpoint+'&source=USD';
+        endpoint=endpoint+'&format=1';
+        req.setEndpoint(endpoint);
+        req.setMethod('GET');
+        HttpResponse res=hp.send(req);
+        if(res.getStatusCode()==200)
+        {
+            
+            system.debug('getStatus='+res.getBody());   
+            jsonString=res.getBody();
+            System.JSONParser jp=JSON.createParser(jsonString);
+            while(jp.nextToken()!=null){
+                if(jp.getText()=='USDINR'){
+                    jp.nextToken();
+                    INRValue=(Decimal)jp.getDecimalValue();
+                }
+            }
+            for(PricebookEntry pb:pricebookEntries){
+                
+                pb.INRValue__c='RS '+(pb.UnitPrice*INRValue);
+            }
+            update pricebookEntries;
+            
+            
+        }
+    }
+    global void finish(Database.BatchableContext bc){
+      AsyncApexJob job=[SELECT Id, JobType, Status, JobItemsProcessed, ParentJobId, ApexClassId FROM AsyncApexJob where Id=:bc.getJobId()];
+        system.debug('job='+job);
+    }
+    
+}
+
+Execute anynomous window
+-------------------------------
+
+String accessKey='68c1ddeb39d19bc5ba3fe494a59a1936';
+BatchCurrencyAPILayer bc=new BatchCurrencyAPILayer(accessKey);
+Database.executeBatch(bc);
+
+
+Callouts from Schedule Apex
+---------------------------
+
+Schedule apex  not making a callouts 
+workAround - make the callout from future method it must annotated with @future(callout=true) 
+Why it will not support callouts - Depends on system resource avaiablity we cannot make synchronous webservice calloutd so then use future method to 
+make asysnchronous callouts
+
+public class CurrencyLayer {
+    
+    @future(Callout=true)
+    public static void futureCalloutCurrencyAPI(){
+        fetchCurrency();
+    }
+    
+    public static void fetchCurrency(){
+        String jsonString;
+        Decimal INRValue;
+        
+        Http hp=new Http();
+        
+        String accessKey='68c1ddeb39d19bc5ba3fe494a59a1936';
+        HttpRequest req=new HttpRequest();
+        String endpoint='http://apilayer.net/api/live?';
+        endpoint=endpoint+'access_key='+accessKey;
+        endpoint=endpoint+'&currencies=EUR,GBP,CAD,INR';
+        endpoint=endpoint+'&source=USD';
+        endpoint=endpoint+'&format=1';
+        req.setEndpoint(endpoint);
+        req.setMethod('GET');
+        HttpResponse res=hp.send(req);
+        if(res.getStatusCode()==200)
+        {
+            
+            system.debug('getStatus='+res.getStatus());
+            system.debug('getStatus='+res.getBody());   
+            jsonString=res.getBody();
+            System.JSONParser jp=JSON.createParser(jsonString);
+            while(jp.nextToken()!=null){
+                if(jp.getText()=='USDINR'){
+                    jp.nextToken();
+                   INRValue=(Decimal)jp.getDecimalValue();
+                }
+            }
+            
+            
+            List<PricebookEntry> pricebookEntries=[SELECT Id, Name, CurrencyIsoCode,INRValue__c, UnitPrice, ProductCode,
+                                                   Product2Id, Pricebook2Id FROM PricebookEntry where
+                                                   Pricebook2Id='01s0o00000Bd71MAAR' and CurrencyIsoCode='USD'];
+            for(PricebookEntry pb:pricebookEntries){
+                
+                pb.INRValue__c='RS '+(pb.UnitPrice*INRValue);
+            }
+            update pricebookEntries;
+            
+        }
+        
+        
+        
+    }
+}
+
+
+
+public class ScheduleCalloutCurrencyLayer implements Schedulable {
+    public void execute(SchedulableContext sc){
+        CurrencyLayer.futureCalloutCurrencyAPI();
+    }
+
+}
+
+Execute from Anynomous window
+-------------------------------
+String cronExp='0 26 12 * * ? ';
+ScheduleCalloutCurrencyLayer sc=new ScheduleCalloutCurrencyLayer();
+system.schedule('My currency Layer callout -2', cronExp, sc);
+
+
+
+
+
+
+
+

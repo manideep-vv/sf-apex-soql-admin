@@ -1,0 +1,1317 @@
+SOQL Queries:
+=============
+1. soql - Salesforce object query language
+2. Soql are used to fetch the data from the sobject (Standard or custom)
+3. Using Soql we can fetch data it will be single or list of records
+4.Soql will return 50,000 records
+	
+By using SOQL Queries, we can fetch one / more records from One / more objects
+
+We can add one / more user defined conditions to be used to filter the records from the resultset.
+
+We can prepare the SOQL Query by using "SELECT" statement.
+
+Syntax:
+	SELECT <FieldNames / APINames> FROM <ObjectName>
+		[ WHERE <Conditions> ] 
+		[ GROUP BY <ColumnNames> ]
+		[ HAVING <Conditions> ]
+		[ ORDER BY <ColumnNames> ]
+		[ LIMIT <Number Of Records to Return> ]
+		[ OFFSET <Number of Records to Skip> ]
+		[ FOR UPDATE ]
+		[ ALL ROWS ]
+		
+Governor Limits:
+================
+	1. We can have max. of 100 SOQL Queries per Transaction. 
+		When the user tries use more than 100 SOQL Queries, then Salesforce will raise an exception "System.Limit Exception. Too Many SOQL Queries : 101".
+		
+	2. Each SOQL Query can returns max. of 50,000 Records.
+	
+Best Practices:
+===============
+	1. We should not Write any SOQL Queries inside the "FOR Loop". Always avoid the usage of SOQL Queries inside the FOR Loop.
+	
+	2. Don't fetch the unnecessary fields information from the object. So that we can occupy the less memory and we can make the application performance improved.
+	
+Ways to Invoke the SOQL Query:
+==============================
+	Salesforce provides the below 2 Ways.
+	
+		1. By using "Query Editor" option from the Developer Console.
+		
+		2. By using Apex Programming.
+	
+// Write an SOQL Query to fetch the Account ID, Name, Rating, Industry and AnnualRevenue
+	fields information from the object.
+		
+	Select id, name, rating, industry, annualrevenue from account
+	
+// Write an SOQL Query, to fetch all the Contact Records from the object.
+	
+	Select id, firstname, lastname, title, department, 
+						leadsource, email, phone, fax 
+							from Contact
+							
+// Write an SOQL Query, to fetch all the User Records from the object.
+
+	Select id, firstname, lastname, email, username, title, isActive from user
+	
+// Write an SOQL Query, to fetch all the Email Templates from the object.
+
+	Select id, name, subject, templatetype, body from emailtemplate
+
+// Write an SOQL Query, to fetch all the Hiring Manager Records from the object. (Create custom object before writing query)
+	
+	Select id, name, location__C, email_id__C, contact_Number__C from Hiring_Manager__C
+
+// Write an SOQL Query, to fetch all the Position Records from the object.
+
+	Select id, name, location__C, position_status__c, milestone_date__C,HR_Contact_Number__C, hr_Email_id__C 
+								from Position__C
+
+Note:
+	We can invoke the SOQL Queries by using Apex Programming also.
+	
+	2 Types.
+	
+1. Static SOQL Queries:
+		
+	In Static SOQL Queries, We can't Add the Columns and Conditions to the Query at runtime. It's a Fixed Query.
+		
+	Static SOQL Queries should be always enclosed inside the "Square Braces".
+	
+	Syntax:
+		[ SOQL Query ]
+		
+	Ex:
+		[ Select id, name, rating, industry from Account ]
+		
+	Static SOQL Queries will be executed Automatically by default and it will returns the result.
+	
+If the SOQL Query returns Only One Record:
+------------------------------------------
+	If the SOQL Query returns only one record as the result, then we have to store the record by defining the variable of the associated type.
+	
+	Syntax:
+		<SObjectDatatype> <objectName> = [SOQL Query];
+	
+	Ex:
+		Account acc = [ Select id, name, rating, industry from Account ];
+		
+		if(acc != null)
+		{
+			System.debug('Account Id is...: '+ acc.id);
+			system.debug('Account Name is....: '+ acc.Name);
+			system.debug('Account Rating is...: '+ acc.rating);
+			system.debug('Annual Revenue is...: '+ acc.annualrevenue);
+		}
+	
+	Ex:
+		Hiring_Manager__C hr = [Select id, Name, Location__C, Contact_number__C
+												from Hiring_Manager__C];
+												
+		if(hr != null)
+		{
+			system.debug('Hiring Manager ID is...: '+ hr.id);
+			system.debug('HR Name is....: '+ hr.name);
+			system.debug('Contact Number is...: '+ hr.contact_Number__C);
+			system.debug('Email Id is....: '+ hr.email_id__C);
+		}
+		
+If the SOQL Query returns Multiple Records:
+-------------------------------------------		
+If the SOQL Query returns Multiple Records as the Result, then we have to store the results by defining a "List Collection of the Associated Type".
+
+Syntax:
+	List<SObjectDatatype> <objectName> = [SOQL Query];
+	
+Ex:
+	List<Lead> lstLeads = [Select id, firstname, lastname, email, title, phone from Lead];
+											
+	if(! lstLeads.isEmpty())
+	{
+		for(Lead ld : lstLeads)
+		{
+			system.debug('Lead ID is...: '+ ld.id);
+			system.debug('Lead Name is...: '+ ld.firstname + ' '+ ld.lastname);
+			system.debug('Lead Email Id is...: '+ ld.email);
+		}
+	}
+
+UseCase:
+========
+	Write an apex program, to fetch all the Account Records from the object and will represent on the debug log file.
+	
+Class Code:
+-----------
+public class DatabaseHelper 
+{
+	Public static void GetAllAccountRecords()
+    {
+    	List<Account> lstAccounts = [Select id, name, rating, industry, annualrevenue, 
+                                     			phone, fax, active__C from Account];
+        
+        system.debug('Collection Size is....: '+ lstAccounts.size());
+        
+        if(! lstAccounts.isEmpty())
+        {
+         	for(Account acc : lstAccounts)
+            {
+                system.debug('Account Id is...: ' + acc.id);
+                system.debug('Account Name is...: '+ acc.Name);
+                system.debug('Rating Value is...: '+ acc.Rating);
+                system.debug('Industry Name is...: '+ acc.Industry);
+                system.debug('Annual Revenue is...: '+ acc.AnnualRevenue);
+                system.debug('Contact Number is...: '+ acc.Phone);
+                system.debug('Active Status is...: '+ acc.Active__c);
+                
+                system.debug('--------------------------------------------');
+            }
+        }        
+    }
+}
+
+Execution:
+----------
+	DatabaseHelper.GetAllAccountRecords();	
+	
+UseCase:
+========
+	Write an apex program, to fetch all the Case Records from the object and represent on the Debug Log File.
+	
+Class Code:
+-----------
+public class DatabaseHelper 
+{
+    Public static void GetAllCaseRecords()
+    {       
+            for(Case cs : [Select id, casenumber, status, priority, origin, type, reason, subject from Case])
+            {
+                system.debug('Case Number is...: '+ cs.CaseNumber);
+                system.debug('Case Status is...: '+ cs.Status);
+                system.debug('Case Priority.....: '+ cs.Priority);
+                system.debug('Case origin......: '+ cs.Origin);
+                system.debug('Case Reason is....: ' +cs.Reason);
+                system.debug('Case Subject is....:' + cs.Subject);
+                system.debug('---------------------------------------');
+            }       
+    }
+}
+
+Execution:
+----------
+	DatabaseHelper.GetAllCaseRecords();	
+	
+UseCase:
+========
+	Write an apex program, to fetch all the case Records from the object and represent on the Debug Log File, by storing the records in the Map Collection.
+	
+Class Code:
+-----------
+ Way-1
+-----------
+
+public class SoqlExample {
+    List<Case> cases{set;get;}
+    Map<Id,Case> caseMap {set;get;}
+    Public SoqlExample(Integer count){
+        cases=new List<Case>();
+        Map<Id,Case> caseMap =new Map<Id,Case>();
+        caseMap= new Map<Id,Case>(
+            [SELECT Id, CaseNumber, ContactId, AccountId, Status, Reason, Origin, Subject FROM Case limit :count]);
+       
+        if(caseMap.keySet()!=null){
+            system.debug('caseMap.keySet() ='+caseMap.keySet());
+        }
+        system.debug('caseMap.values()='+caseMap.values());
+        for(Case  cs:caseMap.values()){
+            system.debug('case='+cs);
+        }
+    }
+}
+
+Debug----> open Execute Anonymous window---------->
+-----------------------------------------------------------------------------
+
+new SoqlExample(5);
+
+Way-2
+--------
+public class SoqlExample {
+    
+    Public static void GetAllHRRecords(Integer count){
+        List<Case> cases=new List<Case>();
+        Map<Id,Case> caseMap =new Map<Id,Case>();
+        cases=[SELECT Id, CaseNumber, ContactId, AccountId, Status, Reason, Origin, Subject FROM Case limit :count];
+       
+        for(case mycase:cases){
+            caseMap.put(mycase.Id,mycase);
+        }
+        if(caseMap.keySet()!=null){
+            system.debug('caseMap.keySet() ='+caseMap.keySet());
+        }
+        system.debug('caseMap.values()='+caseMap.values());
+        for(Case  cs:caseMap.values()){
+            system.debug('case='+cs);
+        }
+    }
+}
+
+Debug----> open Execute Anonymous window---------->
+-----------------------------------------------------------------------------
+SoqlExample sqol=new SoqlExample();
+SoqlExample.GetAllHRRecords(4);
+
+
+Write a soql query to fetch 5 acount records from 10th position
+Select id, name, rating, industry, annualrevenue,  isDeleted from Account limit 5 offset 10
+
+Write a soql query to display acount records sort by ascending order
+Select id, name, rating, industry, annualrevenue,  isDeleted from Account order by name asc
+
+Write a soql query to dsiplay acount records sort by descending order
+
+Select id, name, rating, industry, annualrevenue,  isDeleted from Account order by name desc
+
+write a soql query to fetch last 10 account records bases on created date
+
+Select id, name, rating, industry, createdDate ,  isDeleted from Account order by createdDate desc limit 10
+
+
+write a soql query to to fetch last 10 modified account records 
+Select id, name, rating, industry, createdDate ,  isDeleted from Account order by lastModifiedDate desc limit 10
+
+
+	
+Assignments:
+============
+	1. Write an apex program, to fetch all the Contact Records from the object and represent the records on the Debug Log File.
+	
+	2. Write an apex program, to fetch all the Opportunity Records from the object and represent on the Debug Log File.
+	
+	3. Write an apex program, to fetch all the User Records from the object and store them into the "Map Collection" and Display the Records on the Debug Log File.
+	
+	4. Write an apex program, to fetch all the Position Records from the object and store them to the Map Collection. And represent the records on the Debug Log File.
+	
+Limit Clause:
+=============
+
+Syntax:
+	[ SOQL Query
+			Limit <Integer> ]
+			
+Ex:
+	[SOQL Query
+			Limit 1]
+			
+	Limit 5
+	Limit 10
+	Limit 25
+	
+UseCase:
+========
+	Write an apex program, to fetch only 5 Case Records from the object.
+	
+Class Code:
+-----------
+public class DatabaseHelper 
+{
+    Public static void GetCaseRecords()
+    {
+        List<Case> lstCases = [Select id, casenumber, status, priority, type, reason, subject from Case  Limit 5];
+        
+        for(Case cs : lstCases)
+        {
+            system.debug('Case Record is...: '+ cs);
+        }
+    }
+}
+
+Execution:
+----------
+	DatabaseHelper.GetCaseRecords();
+	
+// Write an SOQL Query, to fetch 10 Hiring Manager Records from the object.
+
+	List<Hiring_Manager__C> lstHrRecords =	[Select id, name, location__C, 
+                                             			contact_Number__C, email_id__C
+            													from Hiring_Manager__C
+            															Limit 10];
+
+// Write an SOQL Query to fetch 2 Email Templates from the object.
+	
+	List<EmailTemplate> lstTemplates = [Select id, name, description, templatetype, subject, body
+            											from EmailTemplate
+            													Limit 2];
+
+// Write an SOQL Query, to fetch only one User Record from the object.
+
+	User userRecord = [Select id, firstname, lastname, email, username, isactive
+            				from User
+            						Limit 1];
+
+//Fetch the Name from the account soql query instead storing in sobject
+
+public class SoqlExample {
+    
+    Public static void displayAccountName(){
+    String  accName=[Select id, name, rating  from Account limit 1].name;
+        system.debug('accName='+accName);
+    
+    }
+}
+
+//Fetch account records names store it in a list
+public class SoqlExample {
+    
+    Public static void displayAccountName(){
+      List<String>  accs=new List<String>();
+    for(account acc:[Select id, name, rating  from Account limit 10])
+    {
+       accs.add(acc.name);
+    }
+        system.debug('accs='+accs);
+    
+    }
+}
+
+	
+ALL ROWS:
+=========
+Syntax:
+	[SOQL Query
+			ALL ROWS]
+			
+UseCase:
+========
+	Write an apex program, to fetch all the Account Records from the object, including Deleted Records.
+	
+Class Code:
+------------
+public class DatabaseHelper 
+{
+    Public static void ExportAllAccounts()
+    {
+        for(Account acc : [Select id, name, rating, industry, annualrevenue, active__C, isDeleted
+                          				from Account
+                          					ALL ROWS])
+        {
+            system.debug('Account Record is...: '+ acc);
+        }
+    }
+}
+
+Execution:
+----------
+	DatabaseHelper.ExportAllAccounts();
+	
+ORDER BY Clause:
+================
+Syntax:
+	[SOQL Query
+			ORDER BY <ColumnName> [ASC(Default) / DESC] ]
+			
+UseCase:
+========
+	Write an apex program, to fetch all the Account Records from the object and arrange the records in Alphabetical Order based on the Name.
+	
+Class Code:
+-----------
+public class DatabaseHelper 
+{
+    Public static void GetSortedAccountsByName()
+    {
+        List<Account> lstAccounts =	[Select id, name, rating, industry, annualrevenue, active__C
+        									from Account
+        										Order by name desc];
+        
+        for(Account acc : lstAccounts)
+        {
+            system.debug('Account Record...: '+ acc);
+        }
+    }
+}
+
+Execution:
+----------
+	DatabaseHelper.GetSortedAccountsByName();
+	
+/*
+	Write an SOQL Query, to fetch all the User Records and Arrange them in Alphabetical Order based
+ 	on UserName field.
+*/
+	List<User> lstUSers = [Select id, firstname, lastname, company, email, username, isActive
+                          			from User
+                          				Order by username];
+
+/*
+	Write an SOQL Query to fetch top 5 Highest Amount Opportunity Records.
+*/
+	List<Opportunity> lstOppty = [Select id, name, closedate, amount, stagename
+                                 			from Opportunity
+                                 					Order by amount desc
+                                 							Limit 5];
+
+/*
+	Write an SOQL Query to fetch the recently posted 3 Position Records.
+*/
+	List<Position__C> lstPositions = [Select id, name, location__C, position_status__C,
+                                     			open_date__C, milestone_date__C, createddate
+                                     					from Position__C
+                                     						Order by CreatedDate desc
+                                     								Limit 3];
+	
+FOR UPDATE:
+===========
+Syntax:
+	[SOQL Query 
+			FOR UPDATE]
+			
+Ex:
+	List<Contact> lstContacts = [Select id, firstname, lastname, email, title, phone,
+										fax, mailingCity, mailingCountry
+												from Contact
+													FOR UPDATE];
+													
+OFFSET Clause:
+==============
+This clause is used to specify the Number of Records to be get Skipped from the ResultSet.
+
+Syntax:
+	[SOQL Query
+		OFFSET  <Integer> ]
+		
+Ex:
+	OFFSET 10
+	OFFSET 5
+	OFFSET 20
+	
+Ex:
+	OFFSET :<ParameterName>	
+		
+Note:
+	Both Limit Clause and OFFSET Clause will be used to achieve the Pagination. Where "Limit Clause" value should be always "Fixed". And Offset clause value will be keep on changing upon click on the "Navigation Buttons".
+	
+Note:
+	Always OFFSET Clause should be followed by the "LIMIT Clause".
+	
+UseCase:
+========
+	Write an apex program, to fetch the Accounts from the object based on the specified OFFSET and Limit Values.
+	
+Class Code:
+-----------
+public class DatabaseHelper 
+{    
+    Public static void GetAccounts(integer limitValue, integer offsetValue)
+    {
+        List<Account> lstAccounts = [Select id, name, rating, industry, annualrevenue, active__C
+                                    			from Account
+                                     				Order by name
+                                    					Limit : limitValue
+                                    						Offset : offsetValue];
+        
+        if(! lstAccounts.isEmpty())
+        {
+            for(Account acc : lstAccounts)
+            {
+                system.debug('Account Record...: '+ acc);
+            }
+        }
+    }
+}
+
+Execution:
+----------
+	DatabaseHelper.GetAccounts(50, 10);
+	
+	DatabaseHelper.GetAccounts(50, 5);
+	
+	DatabaseHelper.GetAccounts(50, 15);
+
+
+SELECT Id, LastName, Username, FirstName, Name, CompanyName FROM User order by LastName 
+
+SELECT Id, LastName, Username, FirstName, Name, CompanyName FROM User order by LastName limit 7
+SELECT Id, LastName, Username, FirstName, Name, CompanyName FROM User order by LastName limit 7 offset 3
+
+SELECT Id, LastName, Username, FirstName, Name, CompanyName FROM User order by LastName offset 3
+	
+WHERE Clause:
+=============
+Syntax:
+	[SOQL Query
+		WHERE <Conditions> ]
+		
+Ex:
+1. write a soql query to fetch all account records whose rating is hot
+	Select id, name, rating  from Account where rating='Hot'
+2. write a soql query to fetch all account records whose Industry is 'Banking'
+	Select id, name,Industry , rating  from Account Where Industry = 'Banking'
+3. write a soql query to fetch all account records whose AnnualRevenue is greater than 2500000
+	Where AnnualRevenue >= 2500000
+4. write a soql query to fetch all account records whose AccountSource  is 'Web'
+	
+	Select id, name, AccountSource from Account Where AccountSource= 'Web'
+5.write a soql query to fetch all account records whose AccountSource is not empty
+	Select id, name, AccountSource from Account Where AccountSource !=Null
+	
+	
+ and, or, not
+-----------------
+1. write a soql query to fetch all account records whose rating is 'Warm' and industry is 'Finance'
+	
+Select id, name, AccountSource from Account Where rating='warm' and industry='Finance'
+
+
+Select id, name,Industry , rating  from Account Where (Industry = 'Energy' and name like 'United%') or rating='Hot' 
+
+
+Select id, name, Industry, Phone, rating from Account Where (Industry = 'Energy' and name like 'United%') or (rating='Hot' and Phone=null)
+
+Select id, name,Industry , Phone,rating  from Account Where (Industry = 'Energy' and name like 'United%') or rating='Hot' or Phone!=null
+
+
+
+	
+UseCase:
+========
+	Write an apex program, to fetch all the Hiring Manager Records, who are associated with "Bangalore Location".
+	
+Class Code:
+-----------
+public class DatabaseHelper 
+{    
+    Public static void GetBangloreHRRecords()
+    {
+       List<Hiring_Manager__C> lstHrs =	[Select id, name, Location__C, Contact_Number__C, Email_id__C
+        										from Hiring_MAnager__C
+        											Where Location__C = 'Bangalore'];
+        
+        system.debug('Collection Size is....: '+ lstHRs.Size());
+        
+        if(! lstHrs.isEmpty())
+        {
+            for(Hiring_Manager__C hr : lstHrs)
+            {
+                system.debug('Hiring Manager Record...: '+ hr);
+            }
+        }
+    }
+}	
+
+Execution:
+----------
+	DatabaseHelper.GetBangloreHRRecords();
+	
+/*
+	Write an SOQL Query to fetch all the Banking Account Records from the object.
+*/
+	List<Account> lstAccounts = [Select id, name, rating, industry, annualrevenue, active__C
+                                			from Account
+                                				Where Industry = 'Banking'];
+
+/*
+	Write an SOQL Query to fetch all the Case Records whose Priority is "High" and Status is "New".
+*/
+	List<Case> lstCases = [Select id, casenumber, status, priority, origin, type, reason
+                          					from Case
+                          						Where Priority = 'High' and Status = 'New'];
+
+/*
+	Write an apex program, to fetch only the Deleted Account Records from the Account object.
+*/
+	List<Account> lstDeletedAccounts = [Select id, name, rating, industry, isDeleted
+                                       			from Account
+                                       				Where isDeleted = true
+                                        				ALL ROWS ];
+
+/*
+	Write an SOQL Query, to fetch all the Active User Records.
+*/
+	List<User> lstActiveUsers = [Select id, firstname, lastname, email, username, isActive
+                                			from User
+                                				Where isActive = true];
+	
+Note:
+	Upon preparing the SOQL Query, we can supply the values to the Clauses to prepare the conditions dynamically at runtime.
+	
+	Syntax:
+		Where <FieldName> <operator> <Value>
+		
+	Ex:
+		String ratingValue = 'Hot';
+		Where rating =: ratingValue;
+		
+		integer salaryAmount = 2500000;
+		Where current_ctc__c >= :salaryAmount
+
+public class SoqlExample {
+    
+    Public static void dynamicSoqlValue(String ratingValue){
+      List<account>  accs=new List<account>();
+        //
+    accs=[Select id, name, rating  from Account where rating=:ratingValue];
+    }
+}
+
+
+
+SoqlExample.dynamicSoqlValue('warm');
+		
+UseCase:
+========
+	Write an apex program, to fetch all the Case Records based on the specified "Priority".
+	
+Class Code:
+-----------
+public class DatabaseHelper 
+{    
+    Public static void GetCassesByPriority(string casePriority)
+    {
+    	if(casePriority != null && casePriority != '')
+        {
+            for(Case csRecord  : [Select id, casenumber, priority, status, type, origin
+            							from Case
+            								Where priority =: casePriority])		
+            {
+                system.debug('Case Record is...: '+ csRecord);
+            }
+        }       
+    }  
+}
+
+Execution:
+----------
+	DatabaseHelper.GetCassesByPriority('Low');
+	
+	DatabaseHelper.GetCassesByPriority('High');
+	
+Assignments:
+============
+	1. Write an Apex program, to fetch all the Account Records based on the specified "Industry" at runtime.
+	
+	2. Write an apex program, to fetch all the Position Records based on the specified position Status.
+	
+	3. Write an apex program, to fetch the User Record based on the Specified User Name.
+	
+	4. Write an apex program, to fetch all the Opportunity Records based on the specified StageName.
+	
+Dynamic SOQL Queries:
+=====================
+Dynamic SOQL Query allows us to add the columns and conditions to the Query dynamically at runtime based on the application requirement.
+
+Step 1: Dynamic SOQL Query should be always stored inside a "String Variable".
+	Syntax:
+		string <variableName> = 'SOQL Query';
+		
+	Ex:
+		string accountsQuery = 'Select id, name, rating, industry, annualrevenue from
+								account';
+								
+Step 2: We need to invoke the SOQL Query manually by using "Database.Query()" method.
+		Dynamic SOQL Query will always returns the results in the form of "List" collection.
+	Syntax:
+		List<SObjectDatatype> <objectName> = Database.Query(<SOQL Query>);
+		
+	Ex:
+		List<Account> lstAccounts =	Database.Query(accountsQuery);
+		
+
+
+
+
+public class SoqlExample {
+    
+    Public static void dynamicSoqlValue(String ratingValue){
+      List<account>  accs=new List<account>();
+  String soqlQuery='Select id, name, rating  from Account where rating=';
+        soqlQuery=soqlQuery+'\''+ratingValue+'\'';
+        soqlQuery+=' and name like '+ '\''+'united%'+'\'';  
+        system.debug(soqlQuery);
+        List<Sobject> objList=Database.query(soqlQuery);
+        for(Sobject obj:objList){
+            system.debug('account record='+obj);
+        }
+       
+    }
+}
+
+
+SoqlExample.dynamicSoqlValue('Hot');
+
+
+
+Dynamic Soql Query Creation
+----------------------------------------
+[Select id, name, rating  from Account Where rating= 'warm' and industry='Education']
+
+public class SoqlExample {
+    
+    Public static void dynamicSoqlValue(String ratingValue,String industryValue){
+        List<account>  accs=new List<account>();
+        String soqlQuery='Select id, name, rating  from Account ';
+        if( ratingValue!='' && ratingValue!=null && industryValue!='' && industryValue!=null){
+            //Where rating='ratingValue' and industry='Eduction'
+            soqlQuery+='Where rating= \''+ratingValue+'\' and industry=\''+industryValue+'\'';
+        }
+        else if(ratingValue!='' && ratingValue!=null)
+        {
+            soqlQuery+='Where rating= \''+ratingValue+'\'';
+        }
+        else if(industryValue!='' && industryValue!=null)
+        {
+            soqlQuery+='Where industry= \''+industryValue+'\'';
+            
+        }
+        system.debug(soqlquery);
+        List<Sobject> objList=Database.query(soqlQuery);
+        for(Sobject obj:objList){
+            system.debug('account record='+obj);
+        }
+        
+        
+    }
+}
+
+Execute
+-------------------------------
+
+SoqlExample.dynamicSoqlValue('warm','Education');
+
+
+UseCase:
+========
+	Write an apex program, to search for the Lead Records based on the specified input supplied by the user at runtime.
+		1. If the Input value is a string, then Search the Leads based on "Last Name".
+		2. If the Input value is an Email, then Search the Leads based on the "Email Field".
+
+
+
+
+		
+Class Code:
+-----------
+public class DatabaseHelper 
+{   
+    Public static void SearchLeadRecords(string searchText)
+    {
+        if(searchText != null && searchText != '')
+        {
+            string leadRecordsQuery = 'Select id, firstname, lastname, email, phone, fax from Lead ';
+            
+            if(Pattern.matches('^[a-zA-Z0-9._|\\\\%#~`=?&/$^*!}{+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,4}$', searchText))
+            {
+                system.debug('Input Value is an Email ID.');
+                leadRecordsQuery += 'Where email =: searchText';
+            }
+            else
+            {
+                system.debug('Input Value is a String.');
+                leadRecordsQuery += ' Where lastname =: searchText';
+            }
+            
+            List<Lead> lstLeads = Database.Query(leadRecordsQuery);
+            system.debug('Collection Size is...: '+ lstLEads.size());
+            
+            for(Lead ld : lstLEads)
+            {
+                system.debug('Lead Record is...: '+ ld);
+            }            
+        }
+    }
+}
+
+Execution:
+----------
+	DatabaseHelper.SearchLeadRecords('sample@gmail.com');
+
+
+
+	
+IN Operator:
+============
+	Select id, name, rating, industry, annualrevenue, active__C, phone, fax
+			from Account
+				Where industry = 'Banking' OR 
+						Industry = 'Finance' OR
+							Industry = 'Manufacturing' OR
+								Industry = 'Education' OR
+									Industry = 'Insurance' OR
+										Industry = 'Consulting'
+										
+								(OR)
+								
+	Where industry IN ('Banking','Finance','Manufacturing', 'Education',
+						'Insurance','Consulting' )
+
+							(OR)
+								
+	String[] countryNames = new string[]{'Banking','Finance','Manufacturing', 'Education',
+											'Insurance','Consulting'};
+		
+	Where industry in : countryNames
+	
+							(OR)
+							
+	List<String> lstCountries = new List<String>{'Banking','Finance','Manufacturing',
+												'Education','Insurance','Consulting'};
+												
+	Where industry IN : lstCountries
+	
+							(OR)
+							
+	Set<String> setCountries = new Set<String>{'Banking','Finance','Manufacturing',
+												'Education','Insurance','Consulting'};
+												
+	Where industry IN : setCountries
+		
+		
+
+Fetch all contact records whose account record industry is 'Energy'
+
+
+Select id, name, rating, industry from Account Where industry='Energy'
+
+Select id, FirstName,LastName,Account.Name from Contact Where AccountId IN('0010o00002BTo4tAAD','0010o00002BTo4uAAD','0010o00002BTo4qAAD')
+
+
+
+
+
+public class SoqlExample {
+    
+    Public static void dynamicSoqlValue(String industryValue){
+        List<account>  accs=new List<account>();
+        List<Id> accountIds=new List<Id>();
+        String soqlQuery='Select id, name, rating  from Account ';
+        if(industryValue!='' && industryValue!=null)
+        {
+            soqlQuery+='Where industry= \''+industryValue+'\'';
+            
+        }
+        system.debug(soqlquery);
+        List<Sobject> objList=Database.query(soqlQuery);
+        for(Sobject obj:objList){
+            system.debug('account record='+obj);
+            accountIds.add(obj.Id);
+        }
+        
+        List<Contact> contacts=[Select id, FirstName,LastName,Account.Name from Contact Where AccountId IN:accountIds];
+        system.debug('contacts='+contacts);
+        
+    }
+}
+
+
+
+SoqlExample.dynamicSoqlValue('Education');
+
+
+
+
+		Account Records:
+		
+			Account1 	Banking   --> 2
+				|
+				| --> Contact1
+				|
+				  --> Contact2
+				
+			Account2 	Finance
+				|
+				 --> Contact 1
+				
+			Account3 	Banking   --> 4
+				|
+				| --> Contact1
+				|
+				|  --> Contact2
+				|
+				| --> Contact3
+				|
+				  --> Contact4  
+				
+			Acocunt4 	Education
+							
+			Account5 	Banking   --> 2
+				|
+				| --> Contact1
+				|
+				  --> Contact2
+	
+	
+	 
+	Map<ID, Account> mapAccounts = new Map<ID,Account>(Select id, industry from Account Where industry = 'Banking');
+	
+	List<Contact> lst = [Select id, firstname, lastname, email, accountid from Contact Where accountid in : mapAccounts.KeySet()];
+
+UseCase:
+========
+	Write an apex program, to fetch all the Contact Records associated with the "Banking Accounts".
+	
+Class Code:
+------------------
+public class DatabaseHelper 
+{   
+    Public static void GetBankingContacts()
+    {
+        // Get the Banking Account Records with ID's.
+        Map<ID, Account> mapAccounts = new Map<ID,Account>([Select id, name, industry
+                                                           			from Account
+                                                           				Where industry = 'Banking']);
+        if(! mapAccounts.isEmpty())
+        {
+            for(Contact con : [Select id, firstname, lastname, email, title, phone, fax, accountid
+                              			from Contact
+                              				Where accountid IN : mapAccounts.KeySet() ])
+            {
+                system.debug('Contact Record is...: '+ con);
+            }
+        }
+    }
+}
+
+Execution:
+----------
+	DatabaseHelper.GetBankingContacts();
+	
+LIKE Operator:
+==============
+	By using LIKE operator, we can fetch the similar kind of information from the object.
+	
+	Note:
+		LIKE operator should be always used along with the "WHERE Clause".
+		
+Syntax:
+	[SOQL Query
+		Where <ColumnName> LIKE '<Expression>']
+		
+	Upon preparing the expression, we have to use "Wild Card Characters".
+	
+	"%" --> Represents Zero or More Characters
+	"_" (Underscore) --> Represents only One Character
+	
+Ex:
+	Returns the Records Whose Name is Starting with "R".
+		Where Name Like 'R%' --> Rajesh, Ramesh, Rakesh, Raja,...etc.
+                       select Id, Name from Account where name like 't%'
+		
+	Returns the Records Whose Name is Starting with "Ram".
+		Where Name Like 'Ram%' --> Ram Kumar, Ramesh, Ram Tripathi,..etc.
+                           select Id, Name from Account where name like 'test%'
+		
+	Returns the Records Whose LastName is Ending with "Kumar".
+		Where LastName like '%Kumar'--> Ram Kumar, Suresh Kumar, Pawan Kumar,..etc.
+                           select Id, Name from Account where name like '%test'
+	
+	Returns the Records Whose Name Contains the word "Ram".
+		Where Name like '%Ram%' --> Ram Kumar, Paramesh, ...etc.
+                       select Id,Name from Account where name like '%Oil%'
+ 
+		
+	Returns the Records Whose Name's Second Character is "a"
+		Where Name Like '_a%' --> Ram, Raja, Rajesh, Sampath, Santhosh,...etc.
+               select Id,Name from Account where name like '_u%'
+	
+UseCase:
+========
+	Write an apex program, to fetch all the Similar Kind of Account Record based on the name columns by using the LIKE operator.
+	
+Class Code:
+-----------
+public class DatabaseHelper 
+{   
+    Public static void SearchAccounts(string searchText) 
+    {
+        if(searchText != null && searchText != '')
+        {
+            searchText += '%'; 
+            
+            List<Account> lstAccounts = [Select id, name, rating, industry, annualrevenue, active__C
+                                        			from Account
+                                        				Where name like : searchText];
+            
+            system.debug('Collection Size is...: '+ lstAccounts.size());
+            
+            for(Account acc : lstAccounts)
+            {
+                system.debug('Account Record is...: '+ acc);
+            }            
+        }
+    }
+}
+
+Execution:
+----------
+	DatabaseHelper.SearchAccounts('G');
+	
+/*
+	Write an SOQL Query to fetch all the Lead Records whose Last Name starting with the word "kumar".
+*/
+
+	List<Lead> lstLeads = [Select id, firstname, lastname, email, title, phone, fax
+                          			from Lead
+                          				Where lastname like 'kumar%'];
+
+/*
+	Write an SOQL Query to fetch all the Contact Records, whose Mailing Street Contains the word "pally".
+*/
+
+	List<Contact> lstContacts = [Select id, firstname, lastname, title, email, mailingstreet, mailingcity
+                                				from Contact
+                                					Where mailingstreet like '%pally%'];
+
+/*
+	Write an SOQL Query to fetch all the Positions, whose name ends with "Architect".
+*/
+
+	List<Position__C> lstPositions = [Select id, name, location__C, position_status__C,
+                                     		milestone_date__C, maximum_budget__C
+                                     				from Position__C
+                                     					Where name like '%Architect'];
+
+/*
+	Write an apex program, to fetch the Records Count in the object.
+*/
+Class Code:
+-----------
+public class DatabaseHelper 
+{   
+    Public static void GetRecordsCount(String industryvalue)
+    {
+        // Static SOQL Query.
+        	integer recordsCount = [select count(Id) from Account where name];
+        	system.debug('Account Records Count....: '+ recordsCount);
+                
+        // Dynamic SOQL Query.
+        	string accountsQuery = 'Select count() from Account where industry='+industryvalue;
+        	integer accountRecordsCount = Database.countQuery(accountsQuery);
+        	system.debug('Records Count is...: '+ accountRecordsCount);
+        
+        // Number of SOQL Queries we have used in the Transaction..
+        	System.debug('Number of SOQL Queries Used...: '+ System.Limits.getQueries());
+        	System.debug('CPU Cycle Time used...: '+ System.Limits.getCpuTime());
+        	System.debug('Number of Records Retrieved....: '+ system.Limits.getQueryRows());
+        	system.debug('Number of DML Statements used....: '+ system.Limits.getDmlStatements());
+    }
+}
+
+Execution:
+----------
+	DatabaseHelper.GetRecordsCount();
+
+
+GROUP BY 
+---------------------------
+GROUP BY clause is used in SOQL query to group set of records by the values specified in the field. We can perform aggregate functions using GROUP BY clause.
+
+Aggregated functions for GROUP BY clause:
+------------------------------------------------------
+COUNT (FIELD_NAME)
+select count(Id) from Account  //Returns the count of  total Account records
+select count(Id) from Account  //Returns the count of account Records having phone number
+
+COUNT_DISTINCT ()
+
+select COUNT_DISTINCT(Name) from Account // To avoid duplicate account records
+SUM ()
+
+MIN ()
+MAX ()
+
+Example:
+
+
+
+
+GROUP BY With HAVING Clause:
+------------------------------------------------------
+GROUP BY HAVING Clause is used in SOQL to apply a condition based on a group field values.
+
+SELECT LeadSource, COUNT(Name)
+FROM Lead
+GROUP BY LeadSource
+HAVING COUNT(Name) > 100 and LeadSource != 'Phone'
+
+The following query is invalid as City is not included in the GROUP BY clause:
+
+SELECT LeadSource, COUNT(Name)
+FROM Lead 
+GROUP BY LeadSource
+HAVING COUNT(Name) > 100 and  City LIKE 'San%'
+
+
+SELECT Industry, COUNT(Id) From Account GROUP BY Industry HAVING Industry IN ('Agriculture','Manufacturing','Construction')
+
+GROUP BY ROLLUP Clause:
+------------------------------------------------------------
+
+GROUP BY ROLLUP Clause is used to add subtotals to get aggregates data in the query results. It returns multiple levels of subtotal rows. We can add up to three fields in a comma-separated list in GROUP BY ROLLUP Clause statement.
+
+Example:
+
+Grouping By One Rollup Field
+------------------------------------------
+1.SELECT LeadSource, COUNT(Name) cnt
+FROM Lead
+GROUP BY ROLLUP(LeadSource)
+
+Grouping By Two Rollup Fields
+------------------------------------------
+1.SELECT Status, LeadSource, COUNT(Name) cnt
+FROM Lead
+GROUP BY ROLLUP(Status, LeadSource)
+
+2. SELECT Industry, Type, COUNT(Id) From Account GROUP BY ROLLUP (Industry, Type)
+
+
+
+COUNT ( FIELD_NAME ) Method
+---------------------------------------------
+COUNT ( FIELD_NAME ) Method is used to the total number of records of a particular value in the specified value.
+
+1. SELECT Industry, COUNT(Id) From Account GROUP BY Industry
+
+COUNT_DISTINCT() Method
+----------------------------------------
+COUNT_DISTINCT() Method is used to find the total number of distinct non-null field values. This method ignored the null values and returns the non-null values.
+
+2.Select Industry,COUNT_DISTINCT(Name) from Account group by Industry
+
+
+SUM() Method
+---------------------
+Used to return the sum of a field for the grouped field
+SELECT Type,sum(AnnualRevenue) FROM Account group by Type
+SELECT Type,sum(AnnualRevenue) FROM Account group by Type having sum(AnnualRevenue)>0
+SELECT Type,sum(AnnualRevenue) FROM Account group by Type having sum(AnnualRevenue)>22000
+
+MIN () Method
+---------------------
+The MIN() method in SOQL is used to return the lowest values.
+
+SELECT Type,MIN(AnnualRevenue) FROM Account group by Type
+
+MAX () Method
+---------------------
+MAX () method is used to return the maximum or the largest value.
+SELECT Industry ,Max(AnnualRevenue) FROM Account where Industry!=null group by Industry 
+
+
+HAVING Clause
+---------------------
+HAVING Clause is SOQL is used to apply a condition based on a group condition. It is very similar to WHERE clause.
+
+SELECT Industry, Max(AnnualRevenue) FROM Account group by Industry having Industry!=null 
+SELECT Industry ,Max(AnnualRevenue) FROM Account group by Industry having Max(AnnualRevenue)>0
+
+
+1. SELECT Industry ,Max(AnnualRevenue) FROM Account group by Industry having Industry IN('Transportation','Hospitality') order by Max(AnnualRevenue)
+
+
+SELECT Industry ,Max(AnnualRevenue) FROM Account group by Industry having Industry IN
+('Transportation','Hospitality') order by Max(AnnualRevenue) desc
+
+
+
+2. SELECT Industry ,Max(AnnualRevenue) FROM Account where rating!='warm' group by Industry having Industry IN('Transportation','Hospitality') order by Max(AnnualRevenue)
+
+3.SELECT Industry ,Max(AnnualRevenue) FROM Account where rating!='warm' group by Industry having Max(AnnualRevenue)>132345 order by Max(AnnualRevenue)
+
+
+4.SELECT Industry ,Max(AnnualRevenue) FROM Account where rating!='Hot' group by Industry having Max(AnnualRevenue)>132345 order by Max(AnnualRevenue) limit 3 offset 2
+
+
+Using Aliases with GROUP BY
+---------------------------------------
+
+You can use an alias for any field or aggregated field in a SELECT statement in a SOQL query. Use a field alias to identify the field when you’re processing the query results in your code.
+Specify the alias directly after the associated field. For example, the following query contains two aliases: n for the Name field, and max for the MAX(Amount) aggregated field.
+
+
+SELECT Name, MAX(Amount), MIN(Amount) min, SUM(Amount)
+FROM Opportunity
+GROUP BY Name
+	
+		
+Working with Very Large SOQL Queries
+---------------------------------------------
+Your SOQL query sometimes returns so many sObjects that the limit on heap size is exceeded and an error occurs. To resolve, use a SOQL query for loop instead, since it can process multiple batches of records by using internal calls to query and queryMore.
+
+For example, if the results are too large, this syntax causes a runtime exception:
+
+Account[] accts = [SELECT Id FROM Account];
+
+Instead, use a SOQL query for loop as in one of the following examples:
+
+// Use this format if you are not executing DML statements 
+// within the for loop
+
+for (Account a : [SELECT Id, Name FROM Account 
+                  WHERE Name LIKE 'Acme%']) {
+    // Your code without DML statements here
+}
+ 
+
+
+SOQL For Loops
+----------------------------
+SOQL for loops iterate over all of the sObject records returned by a SOQL query.
+
+// Create a savepoint because the data should not be committed to the database
+Savepoint sp = Database.setSavepoint(); 
+
+insert new Account[]{new Account(Name = 'yyy'), 
+                     new Account(Name = 'yyy'), 
+                     new Account(Name = 'yyy')};
+
+// The single sObject format executes the for loop once per returned record
+Integer i = 0;
+for (Account tmp : [SELECT Id FROM Account WHERE Name = 'yyy']) {
+    i++;
+}
+System.assert(i == 3); // Since there were three accounts named 'yyy' in the
+                       // database, the loop executed three times
+
+// The sObject list format executes the for loop once per returned batch
+// of records
+i = 0;
+Integer j;
+for (Account[] tmp : [SELECT Id FROM Account WHERE Name = 'yyy']) {
+    j = tmp.size();
+    i++;
+}
+System.assert(j == 3); // The list should have contained the three accounts
+                       // named 'yyy'
+System.assert(i == 1); // Since a single batch can hold up to 200 records and,
+                       // only three records should have been returned, the 
+                       // loop should have executed only once
+
+// Revert the database to the original state
+Database.rollback(sp); 
+
+
+
+
+
+
+
+
+
+			
+
+
+
+
+
+
+
+
+
+
+	
+								
+								

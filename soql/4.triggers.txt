@@ -1,0 +1,6 @@
+trigger LeadTrigger on Lead (before insert, before update) {
+	System.debug('Lead trigger called');
+}
+trigger MyLeadTrigger on Contact (before insert) {
+System.debug('exe trigger before contact insertion' );
+}

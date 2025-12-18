@@ -1,0 +1,106 @@
+Custom Settings
+-----------------
+Custom settings are similar to custom objects. Application developers can create custom sets of data and associate 
+custom data for an organization, profile, or specific user. All custom settings data is exposed in the application cache,
+which enables efficient access without the cost of repeated queries to the database. Formula fields, validation rules,
+flows, Apex, and SOAP API can then use this data.
+
+
+
+There are two types of custom settings.
+1.List Custom Settings
+2.Hierarchy Custom Settings
+
+List Custom Settings
+--------------------
+A type of custom setting that provides a reusable set of static data that can be accessed across your organization. 
+If you use a particular set of data frequently within your application, putting that data in a list custom setting 
+streamlines access to it. Data in list settings does not vary with profile or user, but is available organization-wide. 
+Examples of list data include two-letter state abbreviations, international dialing prefixes, and catalog numbers for
+ products. Because the data is cached, access is low-cost and efficient: you don't have to use SOQL queries that 
+count against your governor limits.
+
+Accessing a List Custom Setting
+-----------------------------------
+The following example returns a map of custom settings data. 
+The getAll method returns values for all custom fields associated with the list setting.
+Map<String_dataset_name, CustomSettingName__c> mcs = CustomSettingName__c.getAll();
+
+The following example uses the getValues method to return all the field values 
+associated with the specified data set. This method can be used with both list and hierarchy 
+custom settings, using different parameters.
+
+CustomSettingName__c mc = CustomSettingName__c.getValues(data_set_name);
+
+Example
+-----------
+Map<String,Foundation_Countries__c>  countries=Foundation_Countries__c.getAll();
+system.debug('countries='+countries);
+for(String country:countries.keyset()){
+    system.debug('country='+country);
+    system.debug('Country code='+countries.get(country).country_Code__c);
+    
+}
+
+Foundation_Countries__c mc = Foundation_Countries__c.getInstance('United States');
+system.debug('mc='+mc.country_Code__c);
+
+Hierarchy Custom Settings
+-----------------------------
+A type of custom setting that uses a built-in hierarchical logic that lets you “personalize” settings 
+for specific profiles or users. The hierarchy logic checks the organization, profile, and user settings
+ for the current user and returns the most specific, or “lowest,” value. In the hierarchy, settings for an 
+organization are overridden by profile settings, which, in turn, are overridden by user settings.
+
+
+
+
+Accessing a Hierarchy Custom Setting
+-----------------------------------------
+The following example uses the getOrgDefaults method to return the data set values for the organization level:
+CustomSettingName__c mc = CustomSettingName__c.getOrgDefaults();
+
+The following example uses the getInstance method to return the data set values for the specified profile.
+ The getInstance method can also be used with a user ID.
+CustomSettingName__c mc = CustomSettingName__c.getInstance(Profile_ID);
+
+
+
+RegionDetails__c mc = RegionDetails__c.getInstance(userinfo.getProfileId());
+system.debug('mc='+mc.Region_Manager_Name__c);  Sai
+RegionDetails__c mc = RegionDetails__c.getInstance(userinfo.getSessionId());
+system.debug('mc='+mc.Region_Manager_Name__c);
+
+
+example
+-----------
+
+trigger OpportunityTrigger on Opportunity (before update,after update) {
+    
+    if(Trigger.isAfter &&Trigger.isUpdate){
+        RegionDetails__c mc = RegionDetails__c.getInstance(userinfo.getProfileId());
+        system.debug('mc='+mc.Region_Manager_Name__c);  
+        if(mc.Region_Manager_Name__c!='Sai')
+        {
+             OpportunityTriggerHander.shareRecord(Trigger.oldMap,Trigger.NewMap);
+        }
+       
+    }
+       
+    
+}
+
+
+Limits in Custom Settings:
+-----------------------------
+300 fields per custom setting.
+Custom setting object records cannot be shared.
+When a custom setting is created, the owner is not So the owner can’t be changed.
+Custom settings are a type of custom object. The custom setting also counts against the total 
+number of custom objects available for the organization.
+
+
+
+
+
+

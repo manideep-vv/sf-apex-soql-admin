@@ -1,0 +1,697 @@
+DML Statements:
+===============
+	DML --> Data Manipulation Language.
+	
+By using DML Statements, we can perform the operations on one or more records in the object at a time.
+	
+Apex provides the below 2 Ways to perform the DML operations on the Records.
+
+		1. By using DML Statements
+		
+				1. INSERT
+				2. DELETE
+				3. UPDATE
+				4. UPSERT --> UPDATE + INSERT
+				5. UNDELETE
+				6. MERGE		
+		
+
+Account A  Account B  Accounrt c
+c-1             c-2, c-3        c-4
+
+merge accountA accountB;
+
+AccountA
+c-1
+c-2
+c-3
+c-4
+		2. By using Database Class Methods
+		
+				1. Database.Insert()
+				2. Database.Update()
+				3. Database.Delete()
+				4. Database.UnDelete()
+				5. Database.Upsert()
+				6. Database.Merge()
+				7. Database.EmptyRecycleBin()
+
+Governor Limits:
+----------------
+	1. We can use max. of 150 DML Statements per Transaction. 
+		If the user tries use more than 150 DML Statements within a transaction, then Salesforce will abort the Transaction, and will raise an exception "System.LimitExeption. Too Many DML Statements: 151".
+		
+	2. Each DML Statement can process max. of 10,000 Records at a time.
+
+
+Best Practices:
+---------------
+	1. As a Best Practice, Always we have to avoid the usage of DML statements inside
+		the "FOR Loop". 	
+		i.e. Don't use any DML Statements inside the FOR Loop. Use always outside the FOR Loop. store the records in a list and perform DML operation outside for loop.
+
+	2. While performing the DML operations, always we have to use the "Bulkification
+		Process". (store the records in a list)
+	
+INSERT Statement:
+=================
+By using this statement, we can insert one or more records into the object at a time.
+
+	Syntax:
+	-------
+		Inserting Only One Record:
+		--------------------------
+			Insert <objectName>;
+			
+		Inserting Multiple Records:
+		---------------------------
+			Insert <collectionObjectName>;
+
+Account acc1=new Account(Name='Sai Test phone 1');
+Account acc2=new Account(Name='Sai Test phone 2');
+List<Account> accList=new List<Account>{acc1,acc2};
+insert accList;
+
+
+			
+UseCase:
+========
+	Write an apex program, to insert 200 Hiring Manager Records inside the object.
+	
+Class Code:
+-----------
+public class DMLUtility 
+{
+	Public static void InsertBulkHRRecords()
+    {
+        List<Hiring_Manager__C> lstHRRecords = new List<Hiring_Manager__C>();
+        
+        for(integer counter = 1; counter <= 200; counter++)
+        {
+            // Prepare the Record..
+            Hiring_Manager__C hrRecord = new Hiring_Manager__C();
+            
+            	hrRecord.Name = 'DML HR Record - '+ counter;
+            	hrRecord.Location__c = 'Chennai';
+            	hrRecord.Email_ID__c = 'dmlhr'+counter+'@gmail.com';
+            	hrRecord.Contact_Number__c = '9900887766';
+            
+            // Add the record to the collection..
+            	lstHRRecords.Add(hrRecord);
+        }
+        
+        if(! lstHRRecords.isEmpty())
+        {
+        	insert lstHRRecords;    
+        }        
+    }
+}
+
+Execution:
+----------
+	DMLUtility.InsertBulkHRRecords();	
+	
+
+
+List<Account> accList=new List<Account>();
+for(integer i=1;i<=2;i++)
+{
+    Account acc1=new Account();
+    acc1.Name='Raj Test '+i;
+    accList.add(acc1);
+     
+}
+insert accList;
+
+
+Drawbacks of DML Statements:
+============================
+While performing the DML operations on the Records, DML statements causes the below issues.
+
+	1. DML Statements are purely Atomic. 
+		i.e. Each DML statement internally uses a Transaction. Hence while performing the operations, if any of the record has been failed, then it will RollBack the Transaction. 
+		
+	2. DML Statements won't provides the "Partial Processing" mechanism.
+		(i.e. If any of the record has been failed to process, then it should ignore the record and continue with the rest of the records as it is.)
+		
+	3. DML Statements won't provides any Tracking Mechanism, to track the record operation result.
+	
+Database Class:
+===============
+	--> Perform all the DML operations on the object records.
+	--> It provides the various Static methods 
+			Database.Insert()
+	        Database.Update()
+            Database.Delete()
+            Database.UnDelete()
+            Database.Upsert()
+            Database.Merge()
+			Database.EmptyRecycleBin()
+	--> Database Class Methods will overcome all the Drawbacks of all the DML Statements.
+	
+Database.Insert() Method:
+=========================
+	--> We can Insert a collection of records into the object.
+	
+	Syntax:
+	-------
+		1. Database.Insert(<collectionObjectName>):
+		
+		2. Database.Insert(<collectionObjectName>, Boolean <allowTransaction>)
+								
+			Note:
+				1. TRUE --> Maintain Transaction (Same As INSERT)
+				2. False --> Allow Partial Processing
+				
+				
+		Database.SaveResult Class 
+				|
+				 --> Can Store only One Record Result, which has been inserted.
+
+		List<Database.SaveResult> 
+			(OR)
+		Database.SaveResult[] 
+		
+	Database.SaveResult[] results = Database.Insert(lstHRRecords, false);
+	
+	Methods:
+	--------
+		1. Boolean IsSuccess():
+			To know the insertion operation result is success or failed.
+			
+			TRUE --> When the Record inserted Successfully.
+			FALSE --> Record has been Failed to Insert.
+			
+		2. GetID():
+			It returns of Record ID, once the record has been inserted.
+			
+		3. Database.Error[] GetErrors():
+			It returns the Errors information of the failed records.
+			
+	Database.Error Class:
+	---------------------
+		It contains the Errors information of the Failure Records.
+		
+		Methods:
+			1. GetMessage():
+				Returns the Error Message.
+			
+			2. GetStatusCode():
+				Returns the Status Code.
+				Ex:
+					REQUIRED_FIELD_MISSING
+					CUSTOM_VALIDATION_FAILED
+			
+			3. GetFields():
+				Returns the Affected Fields information.
+				Ex:
+					Industry, Rating,...etc.
+		
+
+
+public class SoqlExample {
+    
+    Public static void dmlStatments(){
+        List<Account> accList=new List<Account>();
+        
+        Account acc1=new Account(Name='Raj Test 5');
+        Account acc2=new Account();
+        accList.add(acc1);
+        accList.add(acc2);
+        List<Database.SaveResult> result=Database.insert(accList, false);
+        for(Database.SaveResult sr:result){
+            if(sr.IsSuccess()==true){
+                system.debug('Account ='+sr);
+            }
+            else
+            {
+                
+                List<Database.Error> errors=sr.GetErrors();
+                for(Database.Error err:errors){
+                    system.debug('err='+err.getMessage());
+                    List<String> errorList=err.getFields();
+                    system.debug('err='+errorList);
+                }
+                
+            }
+            
+        }
+        
+    }
+}
+
+UseCase:
+========
+	Write an apex program, to insert 100 Hiring Manager Records inside the object by allowing the Partial Processing.
+	Display each record processing result in the Debug Log File.
+	
+Class Code:
+-----------
+public class DMLUtility 
+{
+	Public static void InsertBulkHRRecords()
+    {
+        List<Hiring_Manager__C> lstHRRecords = new List<Hiring_Manager__C>();
+        
+        for(integer counter = 1; counter <= 100; counter++)
+        {
+            // Prepare the Record..
+            Hiring_Manager__C hrRecord = new Hiring_Manager__C();
+            
+            	hrRecord.Name = 'TEST HR - '+ counter;
+            	hrRecord.Location__c = 'Mumbai';
+            
+            	if(counter != 95)
+                {
+                	hrRecord.Email_ID__c = 'testhr'+counter+'@gmail.com';    
+                }
+            	
+            	if(counter != 90)
+                {
+                	hrRecord.Contact_Number__c = '9900887799';    
+                }            	
+            
+            // Add the record to the collection..
+            	lstHRRecords.Add(hrRecord);
+        }
+        
+        if(! lstHRRecords.isEmpty())
+        {
+        	//insert lstHRRecords;    
+        	
+        	// Allowing Partail Processing Mechanism and store the results in SaveResult class.
+        	Database.SaveResult[] results =	Database.Insert(lstHRRecords, false);
+            
+            // Get Each Record Insert operation result...
+            for(Database.SaveResult res : results )
+            {
+               if(res.isSuccess()) 
+               {
+                   // Record Inserted Successfully.
+                   system.debug('Record Inserted Successfully.');
+                   system.debug('Record ID is....: '+ res.getId());
+               }
+               else
+               {
+                   // Record Insertion has been Failed.
+               	   Database.Error[] errors = res.getErrors();
+                   for(Database.Error err : errors)
+                   {
+                        system.debug('Error Message is...: '+ err.getMessage());   
+                        system.debug('Error Status Code is...: '+ err.getStatusCode());
+                        system.debug('Effected Fields are...: '+ err.getFields());
+                   }
+               }
+                
+               system.debug('----------------------------------------------');
+            }
+        }        
+    }
+}
+
+Execution:
+----------
+	DMLUtility.InsertBulkHRRecords();
+	
+Delete Statement:
+=================
+
+Syntax:
+	Delete Only One Record:
+	-----------------------
+		Delete <objectName>;
+		
+	Delete Multiple Records:
+	------------------------
+		Delete <collectionObjectName>;
+		
+	By using Database Class Method:
+	-------------------------------
+		Database.DeleteResult[] results =Database.Delete(<collectionObjectName>, Boolean);
+	
+UseCase:
+========
+	Write an apex program, to Delete the Records from the Hiring Manager object whose name is starting with the specified Characters.
+	
+Class Code:
+-----------
+public class DMLUtility 
+{
+    Public static void DeleteHRRecords(string startingChars)
+    {
+        /*
+        if(startingChars != null && startingChars != '')
+        {
+            List<Hiring_Manager__C> lstHrs = [Select id, name from Hiring_Manager__C
+                											Where name like : startingChars+'%'];
+            if(! lstHrs.isEmpty())
+            {
+                // Delete lstHrs;
+                Database.DeleteResult[] results = Database.Delete(lstHrs, false);
+            }
+        }
+		*/
+        
+        Delete [Select id, name from Hiring_Manager__C
+            			Where name like : startingChars+'%'];
+    }
+}
+
+Execution:
+----------
+	DMLUtility.DeleteHRRecords('TEST HR');
+	
+UnDelete Statement:
+===================
+	By using this statement, we can re-store the deleted records back to the actual object. We can re-store either One / Multiple / All Records back to the object.
+	
+	Syntax:
+		Re-Store Only One Record:
+		-------------------------
+			UnDelete <objectName>;
+			
+		Re-Store Multiple Records:
+		--------------------------
+			UnDelete <collectionObjectName>;
+			
+		By using Database Class Method:
+		-------------------------------
+			Database.UnDeleteResult[] results =
+						Database.UnDelete(<collectionObjectName>, Boolean);
+
+UseCase:
+========
+	Write an apex program, to Re-Store the Hiring Manager Record back to the object based on the Specified Name.
+	
+Class Code:
+-----------
+public class DMLUtility 
+{
+    Public static void RestoreHRRecords(string startingChars)
+    {
+        if(startingChars != null && startingChars != '')    
+        {
+           List<Hiring_Manager__C> hrsToReStore = [Select id, name, isDeleted
+                                                        from Hiring_Manager__C
+                                                                Where isDeleted = true and name like : startingChars+'%'
+                                                                    ALL ROWS]; 
+            
+           if(! hrsToReStore.isEmpty()) 
+           {
+               Database.UndeleteResult[] results =  Database.UnDelete(hrsToReStore, false);
+           }
+        }
+    }
+}
+
+Execution:
+----------
+	DMLUtility.RestoreHRRecords('TEST HR');
+	
+	DMLUtility.RestoreHRRecords('TEST HR - 2');
+	
+Update Statement:
+=================
+	By using this statement, we can update the records by assigning the new values for the required fields based on the requirement.
+	
+	Syntax:
+		Update Only One Record:
+		-----------------------
+			Update <objectName>;
+			
+		Update Multiple Records:
+		------------------------
+			Update <collectionObjectName>;
+			
+		By using Database Class Method:
+		-------------------------------
+			Database.SaveResult[] results = 
+							Database.Update(<collectionObjectName>, Boolean);
+	
+Note:
+	While updating the records exist in the object, we have to follow the below steps.
+	
+Step 1: Get the Records from the Object, which needs to be get Updated.
+
+		List<Account> lstAccounts =	[Select id, rating, industry from Account
+											Where industry = 'Banking'];
+
+Step 2: Assign the New Values for each Record by iterating the Collection.
+	
+	if(! lstAccounts.isEmpty())
+	{
+		for(Account acc : lstAccounts)
+		{
+			acc.Rating = 'Hot';
+		}
+// Step 3:  Commit the Changes To Database.
+
+		Update lstAccounts;
+	}
+
+UseCase:
+========
+	Write an apex program, to Update the Hiring Managers whose name starting with "Apex HR" we below.
+			Location = 'Mumbai'
+			Contact Number = '8888888888'
+				
+Class Code:
+-----------
+public class DMLUtility 
+{
+    Public static void UpdateHRRecords()
+    {
+        // Step 1: Get the Required HR Records from the object..
+        	List<Hiring_Manager__c> hrsToUpdate = [Select id, name, contact_Number__C, location__C
+                                                  				from Hiring_Manager__C
+                                                  					Where name like 'Apex HR%'];
+        
+        // Step 2: Assign the New Values for the records..
+        	if(! hrsToUpdate.isEmpty())
+            {
+                for(Hiring_Manager__C hr : hrsToUpdate)
+                {
+                    hr.Location__c = 'Mumbai';
+                    hr.Contact_Number__c = '8888888888';
+                }
+                
+                // Step 3: Commit the Changes to Database.
+                Update hrsToUpdate;
+            }
+    }
+}
+
+Execution:
+----------
+	DMLUtility.UpdateHRRecords();
+	
+UseCase:
+========
+	Write an apex program, to DeActivate the User Based on the Specified UserName.
+	
+Class Code:
+-----------
+public class DMLUtility 
+{
+    Public static void DeActivateUser(string uName)
+    {
+        if(uName != null && uName != '')
+        {
+            User userToDeActivate = [Select id, username, isActive
+                                    			from User
+                                    				Where userName =: uName and isActive = true];
+            
+            if(userToDeActivate.id != null)
+            {
+                userToDeActivate.IsActive = false;
+                
+                update userToDeActivate;
+            }
+        }
+    }
+}
+
+Execute:
+--------
+	DMLUtility.DeActivateUser('manager330@gmail.com');	
+			
+Upsert Statement:
+=================
+By using this statement, we can perform both "Update and Insert" into the object at a time by using a Single DML Statement.
+
+	Collection.--> Place the Records to Insert + Place the Records to Update
+	
+Note:
+	It will update the records into the Database, which are having the Record ID. It will insert the records into the object, which are not having the Record Id.
+	
+Syntax:
+	Upsert Only One Record:
+	-----------------------
+		Upsert <objectName>;
+		
+	Upsert Multiple Records:
+	------------------------
+		Upsert <collectionObjectName>;
+		
+	By using Database Class:
+	------------------------
+		Database.UpsertResult[] results =Database.Upsert(<collectionObjectName>, Boolean);
+			
+UseCase:
+========
+	Write an apex program, to Change the Priority as "High" for all New Case Records. And Create a New Case Record into the object.
+	
+Class Code:
+-----------
+public class DMLUtility 
+{
+    Public static void UpsertCaseRecords()
+    {
+        // Prepare a Collection..
+        	List<Case> casesToUpsert = new List<Case>();
+        
+        // Collect the Case Records and assign New Values..
+        	for(Case cs : [Select id, status, priority, type, reason, origin
+                          			from Case Where status = 'New'])
+            {
+                cs.Priority = 'High';
+                cs.Type = 'Mechanical';
+                cs.Origin = 'Email';
+                cs.Reason = 'Performance';
+                
+                // Add the record to collection..
+                casesToUpsert.Add(cs);
+            }
+        
+        // Create a New Case Record..
+        	Case csRecord = new Case();
+        
+        		csRecord.Status = 'New';
+        		csRecord.Priority = 'High';
+        		csRecord.Type = 'Mechanical';
+        		csRecord.Origin = 'Phone';
+        		csRecord.Reason = 'Breakdown';
+        		csRecord.Subject = 'My WebCam is unable to Capture the Videos';
+        		csRecord.Description = 'Dear Customer Support, My Recently Purchased WebCam is Unable to Capture the Videos. Please have a look into the issue and resolve asap. Thanks.';
+        		// Add the record to collection..
+        		casesToUpsert.Add(csRecord);
+        
+        // Perform the Upsert operation..
+        		Database.UpsertResult[] results = Database.upsert(casesToUpsert, false);
+        		
+        		for(Database.UpsertResult res : results)
+                {
+                   if(res.isSuccess()) 
+                   {
+                       if(res.isCreated())
+                       {
+                           system.debug('Record has been Inserted Successfully.');
+                           System.debug('Record ID is....: '+ res.getId());
+                       }
+                       else
+                       {
+                           system.debug('Record Updated Successfully.');
+                       }
+                   }
+                   else
+                   {
+                       // Record Insertion has been Failed.
+                       Database.Error[] errors = res.getErrors();
+                       for(Database.Error err : errors)
+                       {
+                            system.debug('Error Message is...: '+ err.getMessage());   
+                            system.debug('Error Status Code is...: '+ err.getStatusCode());
+                            system.debug('Effected Fields are...: '+ err.getFields());
+                       }
+                   }
+                    
+                   system.debug('----------------------------------------------');
+                }
+    }
+}
+
+Execution:
+----------
+	DMLUtility.UpsertCaseRecords();
+	
+Merge Statement:
+================
+	By using this statement, we can merge the multiple duplicate "Accounts,  Contacts and Leads" into a single record. So that we can avoid the redundancy in the application.
+	
+	Syntax:
+		Merge Two Records:
+		------------------
+			Merge <TargetRecord> <SourceRecord>;
+			
+			Note: Source Record will merge into Target Record.
+			
+		Merge 3 Records:
+		----------------
+			Merge <TargetRecord> List<SourceRecord>;
+			
+		By using Database Class Methods:
+		--------------------------------
+			Database.MergeResult[] results = Database.Merge(<TargetRecord>,
+												List<SourceRecord>, Boolean);
+												
+
+Example:
+========
+Class Code:
+-----------
+public class DMLUtility 
+{
+    Public static void MergeAccountRecords()
+    {
+        Account targetAccount = [Select id, name, rating, industry, annualrevenue, active__C, phone, fax
+                                				from Account
+                                						Where name = 'WR Rule Test Account'
+                                								Limit 1];
+        
+        Account sourceAccount = [Select id, name, rating, industry, annualrevenue, active__C
+                                			from Account
+                                					Where name = 'Private OWD Test Account'
+                                								Limit 1];
+        if(targetAccount != null && sourceAccount != null)
+        {
+            Merge targetAccount sourceAccount;
+        }        
+    }
+}
+
+Execution:
+----------
+	DMLUtility.MergeAccountRecords();
+	
+
+Merge maserRecord mergeRecord;
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+
+
+
+
+
+
+
+
+
+	
+		

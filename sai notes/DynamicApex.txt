@@ -1,0 +1,470 @@
+Apex Describe Information
+-------------------------------
+Schema Describe:
+  Is a way to programmatically learn about metadata of your datamodel with in Apex.
+Schema Describe calls provides the ability to programitically describe the information 
+about the current org schema such as list of top level objects including custom objects and their fields.
+
+           Map<String,Schema.SobjectType> gd = Schema.getGlobalDescribe();
+
+ We can also use schemaDescribe()  to create tree structure of all the objects 
+and fields in the schema browser, to do this we need to use the codemap
+
+
+         Map<String,Schema.SobjectType> gd = Schema.getGlobalDescribe();
+
+Returns map of all Sobjects names or Keys to sObject tokens or values
+for the standard and custom objects defined in the organization.
+
+Schema Class
+-----------------
+The following are methods for Schema. All methods are static.
+
+getGlobalDescribe()
+----------------------
+Returns a map of all sObject names (keys) to sObject tokens (values) 
+for the standard and custom objects defined in your organization.
+
+describeDataCategoryGroups(List<String>)
+-----------------------------------------
+Returns a list of the category groups associated with the specified objects.
+
+describeSObjects(List<String>)
+-----------------------------------
+Describes metadata (field list and object properties) for the specified sObject or array of sObjects.
+
+describeTabs()
+-----------------------
+Returns information about the standard and custom apps available to the running user.
+
+describeDataCategoryGroupStructures(List<Schema.DataCategoryGroupSobjectTypePair>)
+Returns available category groups along with their data category structure for objects specified in the request.
+
+
+Schema Namespace
+-------------------
+The Schema namespace provides classes and methods for schema metadata information.
+The following are the classes in the Schema namespace.
+
+ChildRelationship Class
+---------------------------
+Contains methods for accessing the child relationship as well as the child sObject for a parent sObject.
+
+DescribeFieldResult Class
+------------------------------
+Contains methods for describing sObject fields.
+
+DescribeSObjectResult Class
+----------------------------
+Contains methods for describing sObjects.
+
+DescribeTabResult Class
+-----------------------------
+Contains tab metadata information for a tab in a standard or custom app available in the Salesforce user interface.
+
+ FieldSet Class
+--------------------
+Contains methods for discovering and retrieving the details of field sets created on sObjects.
+
+PicklistEntry Class
+--------------------
+Represents a picklist entry.
+
+RecordTypeInfo Class
+--------------------
+Contains methods for accessing record type information for an sObject with associated record types.
+
+SObjectField Class
+--------------------
+A Schema.sObjectField object is returned from the field describe result using the getControler and getSObjectField methods.
+
+SObjectType Class
+--------------------
+A Schema.sObjectType object is returned from the field describe result using the getReferenceTo method, or from the sObject describe result using the getSObjectType method.
+You can describe sObjects either by using tokens or 
+the describeSObjects Schema method.
+
+
+Both sObject and field tokens have the method getDescribe
+which returns the describe result for that token. On the describe result, the getSObjectType and getSObjectField methods return 
+the tokens for sObject and field, respectively
+
+Example
+------------------
+
+// Create a new account as the generic type sObject
+sObject s = new Account();
+
+// Verify that the generic sObject is an Account sObject
+System.assert(s.getsObjectType() == Account.sObjectType);
+
+// Get the sObject describe result for the Account object
+Schema.DescribeSObjectResult dsr = Account.sObjectType.getDescribe();
+
+// Get the field describe result for the Name field on the Account object
+Schema.DescribeFieldResult dfr = Schema.sObjectType.Account.fields.Name;
+
+// Verify that the field token is the token for the Name field on an Account object
+System.assert(dfr.getSObjectField() == Account.Name);
+
+// Get the field describe result from the token
+dfr = dfr.getSObjectField().getDescribe();
+
+
+
+
+Schema.DescribeSObjectResult is the data type for an sObject describe result.
+
+The following example uses the getDescribe method on an sObject token:
+
+Schema.DescribeSObjectResult dsr = Account.sObjectType.getDescribe();
+
+The following example uses the Schema sObjectType static member variable:
+Schema.DescribeSObjectResult dsr = Schema.SObjectType.Account;
+
+
+
+Accessing All sObjects
+--------------------------
+Use the Schema getGlobalDescribe method to return a map that represents the
+ relationship between all sObject names (keys) to sObject tokens (values). For example:
+
+Map<String, Schema.SObjectType> gd = Schema.getGlobalDescribe(); 
+
+1.Schema.sobject
+------------------
+We will get the objects and its description
+Map<String, Schema.SObjectType> gd = Schema.getGlobalDescribe(); 
+
+Map<String, Schema.SObjectType> gd = Schema.getGlobalDescribe(); 
+system.debug('gd='+gd);
+for(String sobjectt:gd.keySet()){
+    system.debug('sobjectt label='+sobjectt);
+    system.debug('sobjectt value='+gd.get(sobjectt));
+}
+
+output
+-------------
+
+sobjectt label=contracthistory
+sobjectt value=ContractHistory
+sobjectt label=account
+sobjectt value=Account
+
+
+getDescribe()
+---------------
+It will return the list of properties of an object
+
+Syntax
+-----------
+Schema.DescribeSObjectResult dsr = mysobj.get(selectedobj).getDescribe();
+
+example
+---------
+Schema.DescribeSObjectResult dsr = Account.sObjectType.getDescribe();
+system.debug('dsr='+dsr);
+
+
+Map<String, Schema.SObjectType>  dgr=Schema.getGlobalDescribe();
+Schema.DescribeSObjectResult dsr = dgr.get('Account').getDescribe();
+system.debug('dsr='+dsr);
+
+output
+-------------
+dsr=Schema.DescribeSObjectResult[getAssociateEntityType=null;
+getAssociateParentEntity=null;getDataTranslationEnabled=null;
+getDefaultImplementation=null;getHasSubtypes=false;
+getImplementedBy=null;getImplementsInterfaces=null;
+getIsInterface=false;getIsSubtype=false;
+getKeyPrefix=001;getLabel=Account;getLabelPlural=Accounts;
+getName=Account;
+getRecordTypeInfosByDeveloperName={Master=Schema.RecordTypeInfo[getDeveloperName=Master;getName=Master;
+getRecordTypeId=012000000000000AAA;isActive=true;
+isAvailable=
+
+
+
+
+
+dsr=Schema.DescribeFieldResult[getByteLength=765;
+getCalculatedFormula=null;
+getCompoundFieldName=Name;
+getController=null;getDataTranslationEnabled=null;
+getDefaultValue=null;getDefaultValueFormula=null;
+getDigits=0;getFilteredLookupInfo=null;
+getInlineHelpText=null;getLabel=Account Name;
+getLength=255;getLocalName=Name;
+getMask=null;getMaskType=null;
+getName=Name;getPrecision=0;
+getReferenceTargetField=null;getRelationshipName=null;
+getRelationshipOrder=null;getScale=0;
+getSoapType=STRING;getSobjectField=Na
+
+
+
+Schema.SobjectField
+---------------------
+It will return all the fields of an sobject on getDescribe() method
+
+Map<String,Schema.sobjectField> mysobj = mysobj.get(SelectedObject).getDescribe().Fields.getMap();
+
+Schema.DescribeFieldResult dfr = Account.sObjectType.Account.Name.getDescribe();
+system.debug('dsr='+dfr);
+
+
+Map<String, Schema.SObjectType>  dgr=Schema.getGlobalDescribe();
+Schema.DescribeSObjectResult dsr = dgr.get('Account').getDescribe();
+system.debug('dsr='+dsr);
+Map<String,Schema.sobjectField> mysobj = dgr.get('Account').getDescribe().Fields.getMap();
+for(String fieldName:mysobj.keyset()){
+    system.debug('fieldName='+fieldName);
+    system.debug('fieldvalue='+mysobj.get(fieldName));
+    
+}
+
+output
+---------
+fieldName=isdeleted
+fieldvalue=IsDeleted
+fieldName=name
+fieldvalue=Name
+
+
+//Display the sobject information of each object present in the org
+
+public class SchemaExample {
+
+   
+    public SchemaExample()
+    {
+        Map<String, Schema.SObjectType>  dgr=Schema.getGlobalDescribe();
+        for(String dsr:dgr.keySet()){
+           Schema.DescribeSObjectResult describeSobjRes=dgr.get(dsr).getDescribe();
+            system.debug('getLabel='+describeSobjRes.getLabel());
+            system.debug('getName='+describeSobjRes.getName());
+            system.debug('getLabel='+describeSobjRes.isCustom());
+            
+        }
+        
+        
+    }
+}
+
+//Display the Account object information 
+
+public class SchemaExample {
+
+   
+    public SchemaExample()
+    {
+        schema.DescribeSObjectResult res=Account.SobjectType.getDescribe();
+        Schema.DescribeSObjectResult desobjRes=res;
+        system.debug('getKeyPrefix='+res.getKeyPrefix());
+        
+        system.debug('getFields='+desobjRes);
+        system.debug('getLabel='+res.getLabel());
+         system.debug('custom='+res.custom);
+         system.debug('isCustom='+res.isCustom());
+         system.debug('fields='+res.fields);
+        system.debug('fields='+res.fieldsets);
+        
+    }
+}
+
+
+
+
+
+//Display the field properties of a custom sobject and its picklist label and values
+
+public class SchemaExample {
+    
+    
+    public SchemaExample()
+    {
+        
+        //Get the available Sobjects in the org
+        Map<String, Schema.SObjectType>  dgr=Schema.getGlobalDescribe();
+        for(String dsr:dgr.keySet()){
+            Schema.DescribeSObjectResult describeSobjRes=dgr.get(dsr).getDescribe();
+            //Get the Custom sobjects in the org
+            if(describeSobjRes.isCustom())
+            {
+                system.debug('getName='+describeSobjRes.getName());
+                //Get the fields of an Sobject 
+                Map<String,Schema.sobjectField> mysobj = describeSobjRes.Fields.getMap();
+                for(String fieldName:mysobj.keyset()){
+                    system.debug('fieldName='+fieldName);
+                    //Get the information of the field
+                   Schema.sobjectField sobjField=mysobj.get(fieldName);
+                    Schema.DescribeFieldResult dfr=sobjField.getDescribe();
+                    system.debug('getType='+dfr.getType());
+                    system.debug('getDefaultValue='+dfr.getDefaultValue());
+                    List<Schema.PicklistEntry> pickList=dfr.getPicklistValues();
+                    //Display the picklist label and value if it a picklist
+                    for(Schema.PicklistEntry pickValue:pickList)
+                    {
+                        system.debug('pick label='+pickValue.label);
+                        system.debug('getLabel='+pickValue.getLabel()+'getValue='+pickValue.getValue());
+                    }
+                    
+                    system.debug('length='+dfr.length);
+                }
+            }
+            
+            
+        }
+        
+        
+    }
+}
+
+
+//Create a dynamic soql query of an sobject 
+
+public class SchemaExample {
+    
+    
+    public SchemaExample(String sobj,List<String> fieldNames,Integer limitRecords)
+    {
+        String soqlQuery='select ';
+        //Get the available Sobjects in the org
+        Map<String, Schema.SObjectType>  dgr=Schema.getGlobalDescribe();
+        Map<String,String> fieldNameMap=new Map<String,String>();
+        Schema.DescribeSObjectResult describeSobjRes=dgr.get(sobj).getDescribe();
+        //Get the fields of an Sobject 
+        Map<String,Schema.sobjectField> mysobj = describeSobjRes.Fields.getMap();
+        //Create a map to store the field label name as key and field API name as value
+        for(String myfieldName:mysobj.keyset()){
+            Schema.sobjectField sobjField=mysobj.get(myfieldName);
+            //Get the describe field result to fetch the field label and field api name
+            Schema.DescribeFieldResult dfrOfObj= sobjField.getDescribe();
+            system.debug('getLabel='+dfrOfObj.getLabel());
+            system.debug('getName='+dfrOfObj.getName());
+            if(dfrOfObj.isCustom())
+            {
+                fieldNameMap.put(dfrOfObj.getLabel(),dfrOfObj.getName());
+            }
+            else
+            {
+                fieldNameMap.put(myfieldName,dfrOfObj.getName());
+            }
+            
+        }
+        //Iterate on the list of fields passed as parameter to create soql query with field API names
+        Integer count=0;
+        for(String myfieldName:fieldNames){
+            //system.debug('myfieldName='+myfieldName);
+            String fieldAPIName=fieldNameMap.get(myfieldName);
+            if(count==0)
+            {
+                soqlQuery=soqlQuery+' '+fieldAPIName;  
+                count++;
+            }
+            else
+            {
+                soqlQuery=soqlQuery+', '+fieldAPIName;
+            }
+        }
+        
+        soqlQuery=soqlQuery+' from '+sobj +' limit '+limitRecords;
+        system.debug('soqlQuery='+soqlQuery);
+        List<Sobject> sobjList=Database.query(soqlQuery);
+        system.debug('sobjList='+sobjList);
+        
+    }
+}
+
+Execute
+-------------------
+
+List<String> str=new List<String>{'id','Account Number','Data Quality Score'};
+new SchemaExample('Contact',str,10);
+
+
+
+
+Dynamic SOQL
+-------------
+Dynamic SOQL refers to the creation of a SOQL string at run time with Apex code. Dynamic SOQL enables you to create more flexible applications. For example, you can create a search based on input from an end user or update records with varying field names.
+
+To create a dynamic SOQL query at run time, use the database query method, in one of the following ways.
+
+Return a single sObject when the query returns a single record:
+sObject s = Database.query(string_limit_1);
+
+Return a list of sObjects when the query returns more than a single record:
+List<sObject> sobjList = Database.query(string);
+
+
+
+
+String myTestString = 'TestName';
+List<sObject> sobjList = Database.query('SELECT Id FROM MyCustomObject__c WHERE Name = :myTestString');
+
+
+
+
+Dynamic SOSL
+-------------
+Dynamic SOSL refers to the creation of a SOSL string at run time with Apex code. Dynamic SOSL enables you to create more flexible applications. For example, you can create a search based on input from an end user, or update records with varying field names.
+
+To create a dynamic SOSL query at run time, use the search query method. For example:
+
+List<List <sObject>> myQuery = search.query(SOSL_search_string);
+
+The following example exercises a simple SOSL query string.
+
+String searchquery='FIND\'Edge*\'IN ALL FIELDS RETURNING Account(id,name),Contact, Lead'; 
+List<List<SObject>>searchList=search.query(searchquery);
+
+
+
+
+SOQL Injection
+-----------------
+
+
+SOQL injection involves taking user-supplied 
+input and using those values in a dynamic SOQL query. 
+If the input is not validated, it can include SOQL 
+commands that effectively modify the SOQL statement and trick 
+the application into performing unintended commands.
+
+
+// User supplied value: name = Bob 
+// Query string
+SELECT Id FROM Contact WHERE (IsDeleted = false and Name like '%Bob%')
+
+However, what if the user provides unexpected input, such as:
+// User supplied value for name: test%') OR (Name LIKE '
+
+In that case, the query string becomes:
+SELECT Id FROM Contact WHERE (IsDeleted = false AND Name LIKE '%test%') OR (Name LIKE '%')
+
+Now the results show all contacts, not just the non-deleted ones. A SOQL Injection flaw can be used 
+to modify the intended logic of any vulnerable query.
+
+SOQL Injection Defenses
+--------------------------------
+To prevent a SOQL injection attack, avoid using dynamic SOQL queries. Instead, use static queries 
+and binding variables. The vulnerable example above can be re-written using static SOQL as follows:
+
+
+public class SOQLController { 
+    public String name { 
+        get { return name;} 
+        set { name = value;} 
+    } 
+    public PageReference query() { 
+        String queryName = '%' + name + '%';
+        queryResult = [SELECT Id FROM Contact WHERE 
+           (IsDeleted = false and Name like :queryName)];
+        return null; 
+    } 
+} 
+
+If you must use dynamic SOQL, use the escapeSingleQuotes method to sanitize user-supplied input. 
+This method adds the escape character (\) to all single quotation marks in a string that is passed in 
+from a user. The method ensures that all single quotation marks are treated as enclosing strings, instead of database commands.

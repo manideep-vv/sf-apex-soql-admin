@@ -1,0 +1,479 @@
+Apex
+----------------
+Apex is a strongly typed, object-oriented programming language that allows developers to execute flow and transaction control statements on the Salesforce Platform server, in conjunction with calls to the API.
+
+When Should I Use Apex?
+The Salesforce prebuilt applications provide powerful CRM functionality. In addition, Salesforce provides the ability to customize the prebuilt applications to fit your organization. However, your organization may have complex business processes that are unsupported by the existing functionality. In this case, Lightning Platform provides various ways for advanced administrators and developers to build custom functionality.
+
+
+Data Types
+------------------
+In Apex, all variables and expressions have a data type, such as sObject, primitive, or enum.
+A primitive, such as an Integer, Double, Long, Date, Datetime, String, ID, or Boolean 
+An sObject, either as a generic sObject or as a specific sObject, such as an Account, Contact, or MyCustomObject__c 
+A collection, including:
+A list (or array) of primitives, sObjects, user defined objects, objects created from Apex classes, or collections
+A set of primitives 
+A map from a primitive to a primitive, sObject, or collection (Maps)
+A typed list of values, also known as an enum (Enums)
+Objects created from user-defined Apex classes (Classes, Objects, and Interfaces)
+Objects created from system supplied Apex classes
+Null (for the null constant, which can be assigned to any variable)
+
+
+
+Examples
+--------------------
+1.Double d=3.14159;
+
+2. ID id='00300000003T2PGAA0'; //18-character id is present for each record
+
+3. Integer i = 1;
+
+4. Object obj = 10;
+// Cast the object to an integer.
+Integer i = (Integer)obj;
+System.assertEquals(10, i);
+
+
+5. String s = 'The quick brown fox jumped over the lazy dog.';
+
+6.multiple variables can be declared and initialized in a single statement, using comma separation
+
+Integer i, j, k;
+
+7.Boolean b=true;
+
+8.Variable and method names are case-insensitive. 
+
+Integer I;
+//Integer i;  This would be an error.
+
+9.Constants
+Apex constants are variables whose values don’t change after being initialized once. 
+Constants can be defined using the final keyword.
+
+The final keyword means that the variable can be assigned at most once, either in the declaration itself, 
+or with a static initializer method if the constant is defined in a class. 
+
+public class myCls {
+   static final Integer PRIVATE_INT_CONST = 200;
+   static final Integer PRIVATE_INT_CONST2; 
+ }
+
+10.Comments
+Integer i = 1; // This comment is ignored by the parser
+
+Integer i = 1; /* This comment can wrap over multiple
+                  lines without getting interpreted by the 
+                  parser. */
+
+
+11.Conditional (If-Else) Statement
+
+
+syntax
+------------------
+
+if ([Boolean_condition]) 
+    // Statement 1
+else
+    // Statement 2
+
+
+if (place == 1) {
+    medal_color = 'gold';
+} else if (place == 2) {
+    medal_color = 'silver';
+} else if (place == 3) {
+    medal_color = 'bronze';
+} else {
+    medal_color = null;
+}
+
+12.Switch Statement
+
+
+switch on expression {
+    when value1 {		// when block 1
+        // code block 1
+    }	
+    when value2 {		// when block 2
+        // code block 2
+    }
+    when value3 {		// when block 3
+        // code block 3
+    }
+    when else {		  // default block, optional
+        // code block 4
+    }
+}
+
+
+switch on i {
+   when 2 {
+       System.debug('when block 2');
+   }
+   when -3 {
+       System.debug('when block -3');
+   }
+   when else {
+       System.debug('default');
+   }
+}
+
+13.While Loops
+while (condition) {
+    code_block
+}
+
+example
+---------------
+Integer count = 1;
+
+while (count < 11) {
+    System.debug(count);
+    count++;
+}
+
+14. Do-While Loops
+
+The Apex do-while loop repeatedly executes a block of code as long as a particular Boolean condition remains true
+
+do {
+   code_block
+} while (condition);
+
+Example
+----------------
+Integer count = 1;
+
+do {
+    System.debug(count);
+    count++;
+} while (count < 11);
+
+
+15.For Loops
+
+Apex supports three variations of the for loop:
+The traditional for loop:
+
+for (init_stmt; exit_condition; increment_stmt) {
+    code_block
+}
+
+example
+---------------------
+for (Integer i = 0, j = 0; i < 10; i++) {
+    System.debug(i+1);
+}
+
+
+The list or set iteration for loop:
+for (variable : list_or_set) {
+    code_block
+}
+
+example
+----------------------
+
+List<String> colors = new List<String>{
+    'Yellow',
+    'Red',
+    'Green'};
+        for(Integer i=0;i<colors.size();i++){
+            system.debug('Color is='+colors[i]);
+        }        
+
+
+where variable must be of the same primitive or sObject type as list_or_set.
+The SOQL for loop:
+for (variable : [soql_query]) {
+    code_block
+}
+
+or
+for (variable_list : [soql_query]) {
+    code_block
+}
+
+example
+----------------------
+for(Opportunity opty:[SELECT Id, Name,Account.name  FROM Opportunity])
+   {
+       system.debug('Opportunity Name='+opty.Name);
+   }
+
+
+
+Collections
+--------------------
+16. Lists
+A list is an ordered collection of elements that are distinguished by their indices. List elements can be of any data type—primitive types, collections, sObjects, user-defined types, and built-in Apex types.
+
+
+List<DataType> my_list = new List<DataType>();
+
+example - 1
+---------------
+List<String> colors = new List<String>{
+    'Yellow',
+    'Red',
+    'Green'};
+colors.sort(); //sort by Name
+System.assertEquals('Green', colors.get(0));
+System.assertEquals('Red', colors.get(1));
+System.assertEquals('Yellow', colors.get(2));
+
+example - 2
+---------------
+
+List<Account> accountList=new List<Account>();
+      
+        Account acc1=new Account(Name=' Test 1');
+        Account acc2=new Account(Name=' Test 2');
+        accountList.add(acc1);
+        accountList.add(acc2);
+
+
+17. Sets
+A set is an unordered collection of elements that do not contain any duplicates. Set elements can be of any data type—primitive types, collections, sObjects, user-defined types, and built-in Apex types.
+
+Example
+-------------------------
+// Define a new set
+Set<Integer> mySet = new Set<Integer>();
+// Add two elements to the set
+mySet.add(1);
+mySet.add(3);
+// Assert that the set contains the integer value we added
+System.assert(mySet.contains(1)); 
+// Remove the integer value from the set
+mySet.remove(1); 
+
+
+18. Maps
+A map is a collection of key-value pairs where each unique key maps to a single value. Keys and values can be any data type—primitive types, collections, sObjects, user-defined types, and built-in Apex types.
+
+syntax
+------------------------
+Map<Key,value> empMap=new Map<Key,value>();
+
+Example
+---------------------
+Map<Integer,String> empMap=new Map<Integer,String>();
+empMap.put(22,'Sai');
+empMap.put(23,'Raj');
+empMap.put(24,'kar');
+system.debug('empMap='+empMap);
+Boolean isPresent=empMap.containskey(23);
+system.debug('isPresent='+isPresent);
+
+
+19.Classes
+a. A class is a template or blueprint from which objects are created. An object is an instance of a class.
+
+b. A class can contain variables and methods. Variables are used to specify the state of an object, such as the object's Name or Type. Since these variables are associated with a class and are members of it, they are commonly referred to as member variables. Methods are used to control behavior, such as getOtherQuotes or copyLineItems.
+
+c.A constructor is code that is invoked when an object is created from the class blueprint. You do not need to write a constructor for every class. If a class does not have a user-defined constructor, a default, no-argument, public constructor is used.
+
+private | public | global 
+[virtual | abstract | with sharing | without sharing] 
+class ClassName [implements InterfaceNameList] [extends ClassName] 
+{ 
+// The body of the class
+}
+
+Steps to create class
+-------------------------------------
+File -----> New -------> Apex class name -------> ok
+
+public class Employee  {
+
+//Declare variables
+
+  public String FullName;
+  public Integer myage;
+
+//Declare Constructor
+    Employee(String name,Integer age){
+        FullName=name;
+        myage=age;
+    }
+
+//Declare method
+     public void getDetails(){  
+     system.debug('FullName='+FullName+'myage='+myage);
+     }
+
+}
+
+Execute
+----------------------
+Debug----------> Open Executive Anonymous Window ------->
+
+Employee emp=new Employee('Sai',23);
+emp.getDetails();
+
+
+
+20.Extending a Class
+
+A class that extends another class inherits all the methods and properties of the extended class. In addition, the extending class can override the existing virtual methods by using the override keyword in the method definition.
+
+Parent Class
+-----------------------
+public virtual class Bike {
+    public virtual Integer gears(){
+        return 4;
+    }
+    public virtual void ride()
+    {
+        system.debug('In normal bike');
+    }
+}
+
+Child Class
+--------------------------------
+public class HeroBike extends Bike{
+
+    public override  void ride(){
+        system.debug('In hero ride');
+    }
+    
+}
+
+Execute
+----------------------
+Debug----------> Open Executive Anonymous Window ------->
+
+Bike b1=new Bike();
+b1.ride();
+
+
+output
+---------------
+In normal bike
+
+Execute
+----------------------
+
+Debug----------> Open Executive Anonymous Window ------->
+
+HeroBike b1=new HeroBike();
+b1.ride();
+Integer numofGears=b1.gears();
+system.debug('numofGears='+numofGears);
+
+output
+---------------
+In hero ride
+numofGears=4
+
+
+Execute
+----------------------
+
+Debug----------> Open Executive Anonymous Window ------->
+
+
+Bike b1=new HeroBike();  //Parent class reference for child object
+b1.ride();
+Integer numofGears=b1.gears();
+system.debug('numofGears='+numofGears);
+
+
+
+output
+---------------
+In hero ride
+numofGears=4
+
+
+
+21. Apex Class
+
+Steps to create class
+-------------------------------------
+File -----> New -------> Apex class name -------> ok
+
+public class Example {    
+    //Addition
+    public void testMethodAdd(){
+        Integer a=1;
+        Integer b=2;
+        
+        Integer  c=a+b;
+        system.debug('c value='+c);
+        
+    }    
+    //Creation of account records and return success or failure message
+    public static String CreateAccount(String accName){
+        List<Account> accountList=new List<Account>();
+        String message;
+        Account acc1=new Account(Name=accName+' Test 1');
+        Account acc2=new Account(Name=accName+' Test 2');
+        accountList.add(acc1);
+        accountList.add(acc2);
+        
+        try{
+            insert accountList;
+            
+            message='success';
+        }
+        catch(Exception e){
+            message='failed';
+        }
+        return message;
+        
+    }
+    //Identify the opportunity records which are having with and without account name
+    public static void fetchOpportunities(){
+        List<Opportunity>  oppList=[SELECT Id, Name,Account.name, Description FROM Opportunity];
+        List<Opportunity> havingAccountNameRecords=new List<Opportunity>(); 
+        List<Opportunity> havingNoAccountNameRecords=new List<Opportunity>(); 
+        List<String> accountNames=new List<String>();
+        for(Integer i=0;i<oppList.size();i++)
+        {
+            if(oppList[i].Account.name !=null){
+                accountNames.add(oppList[i].Account.name);
+                havingAccountNameRecords.add(oppList[i]);
+            }
+            else
+            {
+                havingNoAccountNameRecords.add(oppList[i]);        
+            }
+        }
+        
+        system.debug('accountNames='+accountNames);
+        
+        system.debug('List no account records='+havingNoAccountNameRecords);
+        for(Integer i=0;i<havingAccountNameRecords.size();i++){
+            system.debug('account Name ='+havingAccountNameRecords[i]);
+            system.debug('accName records='+havingAccountNameRecords[i]);
+        }
+    }
+    //Calling a test2 method from test1 method by passing integer as a parameter
+    public static void test1(){
+        Integer i=1;
+        test2(i); //calling method
+    }
+    public static void test2(Integer intValue){  //called method
+        system.debug(intValue);
+    }
+    
+}
+
+Execute
+----------------------
+
+Debug----------> Open Executive Anonymous Window ------->
+
+
+Example ex=new Example();
+ex.testMethodAdd();
+String returnMessage=Example.CreateAccount('Ram');
+system.debug('Return message='+returnMessage);
+Example.fetchOpportunities();
+Example.test1();

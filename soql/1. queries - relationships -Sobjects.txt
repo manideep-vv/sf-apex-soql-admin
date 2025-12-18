@@ -1,0 +1,149 @@
+
+small where queries
+// Step 1: Write a SOQL query to retrieve all Contacts from a Salesforce Org. Retrieved results should show Contact Name, Title, Phone and Email.
+SELECT Name, Title, Phone, Email FROM Contact
+
+// Step 2: Modify SOQL query to retrieve only those contacts with title ‘VP, Technology’.
+SELECT Name, Title, Phone, Email FROM Contact WHERE Title='VP, Technology'
+
+// Step 3: Modify SOQL, and add another field called ‘Department’ in the results. This field should be the 2nd field in the result.
+SELECT Name, Department, Title, Phone, Email FROM Contact WHERE Title='VP, Technology'
+
+// Step 4: Modify SOQL, retrieve all results satisfying step 2 condition and has department value as ‘Finance’
+SELECT Name, Department, Title, Phone, Email FROM Contact WHERE Title='VP, Technology' AND Department='Finance'
+
+// Step 5: Modify SOQL, include all SVP and VP in your search results. Make sure your result still meets step 4 condition.
+SELECT Name, Department, Title, Phone, Email FROM Contact WHERE Title LIKE '%VP%' AND Department='Finance'
+
+// Step 6: Sort results by name in descending order.
+SELECT Name, Department, Title, Phone, Email FROM Contact WHERE Title LIKE '%VP%' AND Department='Finance' ORDER BY Name DESC
+
+// Step 7: Limit search result to only 3.
+SELECT Name, Department, Title, Phone, Email FROM Contact WHERE Title LIKE '%VP%' AND Department='Finance' ORDER BY Name DESC LIMIT 3
+
+
+Date queries
+----------
+
+// Get all leads created on 15th June 2020
+SELECT Name, Status, LeadSource, Company, Email, CreatedDate FROM Lead WHERE CreatedDate>2020-06-15T00:00:00.000+0000
+
+// Get all leads created today
+SELECT Name, Status, LeadSource, Company, Email, CreatedDate FROM Lead WHERE CreatedDate=TODAY
+
+// Get all leads created after yesterday
+SELECT Name, Status, LeadSource, Company, Email, CreatedDate FROM Lead WHERE CreatedDate>YESTERDAY
+
+// Get all leads created in last 10 days
+SELECT Name, Status, LeadSource, Company, Email, CreatedDate FROM Lead WHERE CreatedDate=LAST_N_DAYS:10
+
+DateTime dtLocal = DateTime.now().addHours(5);
+Then pass to SOQL:
+SELECT Id FROM Lead WHERE CreatedDate >= :dtLocal
+
+
+general queries
+---------- 
+1) fetch name dept, title from contacts
+select name, Department, title from contact
+
+
+
+relationships
+------------------------
+// Get all related contacts of an account
+SELECT Name, Phone, Website, (SELECT Name, Department, Email FROM Contacts) FROM Account
+
+// Get all related contacts (with where clause) of an account (with where clause)
+SELECT Name, Phone, Website, (SELECT Name, Department, Email FROM Contacts WHERE Department='Finance') FROM Account WHERE Name='United Oil & Gas, UK'
+
+// Get all related contacts (with where clause) and opportunities of an account
+SELECT Name, Phone, Website, (SELECT Name, Department, Email FROM Contacts WHERE Department='Finance'), (SELECT Name, Amount FROM Opportunities) FROM Account
+
+// Get all books(child object) of an author (parent object)
+SELECT Name, (SELECT Name FROM Books__r) FROM Author__c
+
+
+
+
+Select Id, name,(select name from contacts ), (select name from opportunity)  from account
+
+example
+------------
+// Get account information from contact
+SELECT Name, Phone, Department, Account.Name, Account.Website FROM Contact
+
+// get grandparent (user) object details
+SELECT Name, Phone, Department, Account.Name, Account.Website, Account.Owner.Name FROM Contact
+
+// Get author(parent object) from books(child object)
+SELECT Name, Price__c, Author__r.Name FROM Book__c
+
+
+// Contact is a parent object of case
+// Account is a parent object of Contact
+
+
+// Retrieve Name, Department and Title of all contacts
+SELECT Name, Department, Title FROM Contact
+
+// Retrieve all Cases (CaseNumber, Subject) raised by the contact
+SELECT Name, Department, Title, (Select CaseNumber, Subject FROM Cases) FROM Contact
+
+// Get parent Account's Name, Rating for each Contact
+SELECT Name, Department, Title, (Select CaseNumber, Subject FROM Cases), Account.Name, Account.Rating FROM Contact
+
+// Make sure Account fields are the initial columns in results
+SELECT Account.Name, Account.Rating, Name, Department, Title, (Select CaseNumber, Subject FROM Cases) FROM Contact
+
+// Retrieve only those records where Account Rating is Hot
+SELECT Account.Name, Account.Rating, Name, Department, Title, (Select CaseNumber, Subject FROM Cases) FROM Contact WHERE Account.Rating='Hot'
+
+// Sort results by Contact Name
+SELECT Account.Name, Account.Rating, Name, Department, Title, (Select CaseNumber, Subject FROM Cases) FROM Contact WHERE Account.Rating='Hot' ORDER BY Name
+
+// Only retrieve open cases (use IsClosed Checkbox field value)
+SELECT Account.Name, Account.Rating, Name, Department, Title, (Select CaseNumber, Subject FROM Cases WHERE IsClosed=false) FROM Contact WHERE Account.Rating='Hot' ORDER BY Name
+
+// Add one more filter condition, Contact Department must be equals to 'Technology'
+SELECT Account.Name, Account.Rating, Name, Department, Title, (Select CaseNumber, Subject FROM Cases WHERE IsClosed=false) FROM Contact WHERE Account.Rating='Hot' AND Department='Technology' ORDER BY Name
+
+
+fetching parent and childs
+----------------------------
+// use list of 'Contact' to store the query result
+// you cannot use list of 'Case', or list of 'Account' as
+// our main object is 'Contact'
+List<Contact> contacts = [SELECT Account.Name, Account.Rating, Name, Department, Title, (Select CaseNumber, Subject FROM Cases) FROM Contact ORDER BY Name];
+
+for(Contact con : contacts){
+    System.debug('Contact Name: '+con.Name+', Contact Department: '+con.Department+', Contact Title: '+con.Title+', Account Name: '+con.Account.Name+', Account Rating: '+con.Account.Rating);
+    // iterate over the child records (Cases)
+    for(Case caseObj : con.Cases){
+        System.debug('Case Number: '+caseObj.CaseNumber+', Case Subject:'+caseObj.Subject);
+    }
+}
+
+
+sObject
+===================
+// create a new account sobject instance
+SObject accountRec = (SObject) Type.forName('Account').newInstance();
+// set field values
+accountRec.put('Name', 'Sample SObject Account');
+accountRec.put('Phone', '7697890786');
+// insert account record
+insert accountRec;
+
+
+// Retrieve all books and assign to a List collection
+List<SObject> books = [SELECT Name, Price__c, Author__r.Name FROM Book__c];
+for(SObject book : books){
+    System.debug('Book Name: '+String.valueOf(book.get('Name'))+' Book Price: '+(Decimal)book.get('Price__c')+ ' Book Author: '+ (String)book.getSObject('Author__r').get('Name'));
+}
+
+// Retrieve all books and assign to a List collection
+List<SObject> books = [SELECT Name, Price__c FROM Book__c];
+for(SObject book : books){
+    System.debug('Book Name: '+String.valueOf(book.get('Name'))+' Book Price: '+(Decimal)book.get('Price__c'));
+}

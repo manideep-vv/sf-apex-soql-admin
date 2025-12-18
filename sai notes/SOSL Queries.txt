@@ -1,0 +1,207 @@
+SOSL Queries:
+=============
+SOSL --> Salesforce Object Search Language
+	
+Apex Provides a Search Engine called as "SOSL Queries", which are used to search for a particular content in all the fields in the multiple objects at a time.
+
+If any of the record is having the search keyword in any of the column in the record, then SOSL Query will return the record automatically.
+
+Note:
+	To search the records inside the object by using SOSL Query, we need to enable the "Allow Search"(Search Status Section) Checkbox upon creating / editing the object settings.
+	
+Note: SOSL Queries should be implemented with the help of "FIND" keyword.
+
+Syntax:
+	FIND 'searchText*' IN ALL FIELDS RETURNING
+			Object1(<Col1>,<Col2>,<Col2>,...., <ColN>),
+			Object2(<Col1>,<Col2>,<Col2>,...., <ColN>)
+			Object3(<Col1>,<Col2>,<Col2>,...., <ColN>),
+			...
+			...
+			Object20(<Col1>,<Col2>,<Col2>,...., <ColN>)
+
+Ex:
+	FIND 'searchText*' IN ALL FIELDS RETURNING
+		Account(<Col1>,<Col2>,<Col3>,.....,<ColN>),
+		Contact(<Col1>,<Col2>,<Col3>,.....,<ColN>),
+		Opportunity(<Col1>,<Col2>,<Col3>,.....,<ColN>)
+		Lead(<Col1>,<Col2>,<Col3>,.....,<ColN>),
+		Order(<Col1>,<Col2>,<Col3>,.....,<ColN>),
+		Position__C(<Col1>,<Col2>,<Col3>,.....,<ColN>),
+		Candidate__C(<Col1>,<Col2>,<Col3>,.....,<ColN>)
+
+List<Sobject>= List<Account>,List<Contact>..........
+List<List<Sobject>>=List<mutlipleListofSobjects>
+		
+Governor Limits:
+----------------
+	1. We can have max. of 20 SOSL Queries per Transaction.
+	2. Each SOSL Query can return max. of 2,000 Records.
+	3. Each SOSL Query can search for the content in max. of 20 objects.
+	4. DML operations can't be applicable on the SOSL Query returned records.
+	
+Apex Programming has sub-categorized the SOSL Queries into 2 Types.
+		
+			1. Static SOSL Queries			
+			2. Dynamic SOSL Queries
+
+	1. Static SOSL Queries:
+	
+		Static SOSL Queries will be executed automatically by default.
+		Always enclosed inside the "Square Braces".
+		
+		Always Static SOSL Queries will return the result in the form of "List<List<SObject>>".
+		
+		Syntax:
+			List<List<SObject>> <objectName> = [ SOSL Query ];
+	
+	2. Dynamic SOSL Queries:
+		
+		We can pass the Search Keyword to the SOSL Query dynamically at runtime.
+		
+		Dynamic SOSL Query should be always stored inside the "String" variable.
+		
+		Syntax:
+			string searchQuery = 'SOSL Query';
+			
+		We need to Execute the Dynamic SOSL Query by using "Search.Query()" method. It will return the results in the form of "List<List<SObject>>".
+		
+		Syntax:
+			List<List<SObject>> <objectName> =	Search.Query(searchQuery);
+
+    
+    
+			
+UseCase:
+========
+	Design a Visualforce Page, to Search for the specified content in multiple objects and represent the records in the Tabular format.
+	(Note: Search for the Content in Account, Contact, Lead and Position Objects)
+	
+VF Page Code:
+-------------
+<apex:page controller="GlobalSearchRecordsController" setup="false" sidebar="false" showheader="true" tabStyle="Customer__c" >
+<apex:sectionHeader title="Search" subtitle="Global Search"/>  
+<apex:form >
+    <apex:pageblock title="Global Search Block">
+        <apex:pageblocksection title="Search Records" columns="2" Collapsible="false">
+            <apex:inputtext label="Enter Search Text : " html-placeholder="Enter Search Text" value="{!searchText}"/>
+            <apex:commandButton value="Search Records" action="{!SearchRecords}" rerender="accBlock, conBlock, ldBlock,posBlock"/>
+        </apex:pageblocksection>
+    </apex:pageblock>
+    
+    <apex:Pageblock title="Matching Accounts : ( {!lstAccounts.size} )" id="accBlock">
+        <apex:PAgeblockTable value="{!lstAccounts}" var="acc">
+             <apex:column value="{!acc.Name}"/>   
+             <apex:column value="{!acc.Rating}"/>
+             <apex:column value="{!acc.Industry}"/>
+             <apex:column value="{!acc.AnnualRevenue}"/>
+             <apex:column value="{!acc.Type}"/>
+             <apex:column value="{!acc.Phone}"/>
+             <apex:column value="{!acc.Fax}"/>
+             <apex:column value="{!acc.Active__c}"/>
+        </apex:PAgeblockTable>
+    </apex:Pageblock>
+    
+    <apex:Pageblock title="Matching Contacts : ( {!lstContacts.size} )" id="conBlock">
+        <apex:pageblocktable value="{!lstContacts}" var="con">
+            <apex:column value="{!con.FirstName}"/>
+            <apex:column value="{!con.LastName}"/>
+            <apex:column value="{!con.Title}"/>
+            <apex:column value="{!con.Email}"/>
+            <apex:column value="{!con.Phone}"/>
+            <apex:column value="{!con.Fax}"/>
+            <apex:column value="{!con.MailingCity}"/>
+        </apex:pageblocktable>
+    </apex:Pageblock>
+
+    <apex:Pageblock title="Matching Leads : ( {!lstLeads.Size} )" id="ldBlock">
+        <apex:PageBlockTable value="{!lstLeads}" var="ld">
+            <apex:column value="{!ld.FirstName}"/>
+            <apex:column value="{!ld.LastName}"/>
+            <apex:column value="{!ld.Title}"/>
+            <apex:column value="{!ld.Company}"/>
+            <apex:column value="{!ld.Status}"/>
+            <apex:column value="{!ld.Rating}"/>
+            <apex:column value="{!ld.Industry}"/>
+            <apex:column value="{!ld.AnnualRevenue}"/>
+            <apex:column value="{!ld.Phone}"/>
+        </apex:PageBlockTable>
+    </apex:Pageblock>
+
+    <apex:Pageblock title="Matching Positions : ( {!lstPositions.Size} )" id="posBlock">
+        <Apex:pageblocktable value="{!lstPositions}" var="pos">
+            <apex:column value="{!pos.Name}"/>
+            <apex:column value="{!pos.Location__c}"/>
+            <apex:column value="{!pos.Maximum_Budget__c}"/>
+            <apex:column value="{!pos.Milestone_Date__c}"/>
+            <apex:column value="{!pos.HR_Contact_Number__c}"/>
+        </Apex:pageblocktable>
+    </apex:Pageblock>
+
+</apex:form>
+</apex:page>
+
+Controller Class:
+-----------------
+public class GlobalSearchRecordsController 
+{
+    Public string searchText{get;set;}
+    
+    Public List<Account> lstAccounts{get;set;}
+    Public List<Contact> lstContacts{get;set;}
+    Public List<Lead> lstLeads {get;set;}
+    Public List<Position__C> lstPositions {get;set;}
+    
+    Public void SearchRecords(String searchText)
+    {
+        lstAccounts = new List<Account>();
+        lstContacts = new List<Contact>();
+        lstLeads = new List<Lead>();
+        lstPositions = new List<Position__C>();
+    
+    
+        if(searchText != null && searchText != '')
+        {
+            string searchQuery = 'FIND '+'\'' + searchText + '*'+'\''+ ' IN ALL FIELDS RETURNING '+
+                                   'Account(ID, name, rating, industry, annualrevenue, phone, fax, type, ownership, active__C),'+
+                                   'Contact(ID, firstname, lastname, email, title, phone, fax, mailingcity, mailingstate, mailingcountry),'+
+                                   'Lead(ID, firstname, company, lastname, email, title, phone, fax,rating, status, industry, annualrevenue),'+
+                                   'Position__C(id, name, location__C, hr_contact_number__C, position_status__C, maximum_budget__C, milestone_date__C)';
+                                    
+            List<List<SObject>> lstRecords = Search.Query(searchQuery);
+            
+            lstAccounts = (List<Account>) lstRecords.Get(0);
+            lstContacts = (List<Contact>) lstRecords.get(1);
+            lstLeads = (List<Lead>) lstRecords.Get(2);
+            lstPositions = (List<Position__c>) lstRecords.Get(3);
+        }
+    }
+}	
+
+Example-2
+-------------------
+	
+ List<List<SObject>> sobjList=[FIND 'Test*' IN ALL FIELDS RETURNING 
+                              Account(Name,Description),Opportunity(Name,Id)];
+//List[0]=List<Account>
+//List[1]=List<Opportunity>
+List<Account> accs=(List<Account>)sobjList.get(0);
+List<Opportunity> optys=(List<Opportunity>)sobjList[1];
+
+system.debug('sobjList='+accs);
+system.debug('optys='+optys);
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	

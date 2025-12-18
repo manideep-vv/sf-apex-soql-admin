@@ -1,0 +1,809 @@
+Json(Javascript Object notation)
+-----
+Json is used to send data to a network or returing response in the format called Json
+
+xml
+----
+<Account>
+<Name>Hunter</Name>
+<Phone>1234567</Phone>
+</Account>
+size overheads are more in Xml
+
+Json
+------
+
+Account:{Name:'Hunter',Phone:1233454566}
+It is one of the format for exchanging the data  across the network
+
+example:
+---------
+Json
+----------------
+{Name:'Hunter',Phone:1233454566}
+
+Json Array []
+-------------
+[{Name:'Hunter',Phone:1233454566},{Name:'vanity',Phone:9865432}]
+
+Json object
+-------------
+{"objectName":{field1:value1,field2:value2,...................fieldn:valuen}}
+
+public class Employee{
+     public String Name;
+     public String city;
+     public Integer age;  
+ 
+}
+
+Convert into JSON String
+----------------------------
+{"Employee":{Name:'Ram',city:'Hyd',age:25}}
+
+Array of employee objects
+----------------------------
+{"Employee":{Name:'Ram',city:'Hyd',age:25},{Name:'krishna',city:'MUB',age:27}}
+
+
+1. JSON is a predefined apex class
+2. It is defined under the namespace of system
+3. This class contains the methods to seralize apex objects into json string or json to apex object
+
+serialize(objectToSerialize)
+--------------------------------
+Serializes Apex objects into JSON String.
+
+
+{Company:{"Employee":{Name:'Ram',city:'Hyd',age:25}, "Rooms":{NumberofRooms:234,steps:54}}}
+
+
+example
+----------
+Contact con=[SELECT Id, Name, Title, Phone, Email FROM Contact limit 1];
+system.debug('Con='+con);
+String jsonStr=JSON.serialize(con);
+system.debug('jsonStr='+jsonStr);
+
+
+Account acc=new Account(Name='vanity',Rating='Hot');
+String myStr1=JSON.serialize(acc);
+system.debug('myStr1='+myStr1); //myStr1={"attributes":{"type":"Account"},"Name":"vanity","Rating":"Hot"}
+Contact con=new Contact();
+con.FirstName='sec';
+con.LastName='fir';
+String myStr2=JSON.serialize(con);
+system.debug('myStr2='+myStr2); //myStr2={"attributes":{"type":"Contact"},"FirstName":"sec","LastName":"fir"}
+
+
+serialize(objectToSerialize, suppressApexObjectNulls)
+-------------------------------------------------------
+Suppresses null values when serializing Apex objects into JSON content.
+Signature
+public static String serialize(Object objectToSerialize, Boolean suppressApexObjectNulls)
+
+Parameters
+objectToSerialize
+Type: Object
+The Apex object to serialize.
+suppressApexObjectNulls
+Type: Boolean
+If true, remove null values before serializing the JSON object.
+
+
+serializePretty(objectToSerialize)
+-------------------------------------------------------
+Serializes Apex objects into JSON content and generates indented content using the pretty-print format.
+Signature
+public static String serializePretty(Object objectToSerialize)
+
+Parameters
+objectToSerialize
+Type: Object
+The Apex object to serialize.
+Return Value
+Type: String
+
+
+Account acc=new Account(Name='vanity',Rating=null);
+String myStr1=JSON.serialize(acc);
+system.debug('myStr1='+myStr1);
+
+String myStr2=JSON.serializePretty(acc);
+system.debug('myStr2='+myStr2);
+
+
+
+
+
+Example -2
+----------------------
+public class Employee{
+     public String Name;
+     public String city;
+     public Integer age;  
+ 
+}
+
+Employee emp=new Employee();
+emp.Name='ram';
+emp.city='Hyd';
+
+
+String json1=JSON.serialize(emp);
+system.debug('json1='+json1);
+
+String json2=JSON.serialize(emp,true);
+system.debug('json2='+json2);
+
+String json3=JSON.serializePretty(emp);
+system.debug('json3='+json3);
+
+String json4=JSON.serializePretty(emp,true);
+system.debug('json4='+json4);
+
+
+
+
+
+deserialize(jsonString, apexType)
+------------------------------------
+Deserializes the specified JSON string into an Apex object of the specified type.
+
+
+
+Account acc=new Account(Name='vanity',Rating='hot');
+String myStr1=JSON.serialize(acc);
+system.debug('myStr1='+myStr1);
+
+Account accObj=(Account)JSON.deserialize(myStr1, Account.class);
+system.debug('accObj='+accObj);
+
+Integer a=10;
+String StrInteger=JSON.serialize(a);
+system.debug('StrInteger='+StrInteger);
+Integer Istr=(Integer)JSON.deserialize(StrInteger, Integer.class);
+system.debug('Istr='+Istr);
+    
+
+public class Employee{
+     public String Name;
+     public String city;
+     public Integer age;  
+ 
+}
+
+Employee emp=new Employee();
+emp.Name='ram';
+emp.city='Hyd';
+emp.age=23;
+
+String json3=JSON.serialize(emp);
+system.debug('json3='+json3);
+Employee emp2=(Employee)JSON.deserialize(json3, Employee.class);
+system.debug('emp2='+emp2);
+
+
+
+
+
+deserializeStrict(jsonString, apexType)
+---------------------------------------------
+Deserializes the specified JSON string into an Apex object of the specified type.
+when deserializing the json if any one of the field which is not present in the Access.Type it will throw error.
+
+system.JSONException : unknown field
+
+
+If the JSON content contains attributes not present in the System.Type argument, 
+such as a missing field or object, deserialization fails in some circumstances.
+
+public class Employee{
+     public String Name;
+     public String city;
+     public Integer age;  
+ 
+}
+
+Employee emp=new Employee();
+emp.Name='ram';
+emp.city='Hyd';
+emp.age=23;
+
+String json3='{"Name":"ram","city":"Hyd","age":23,"empId":4332}';
+system.debug('json3='+json3);
+
+Employee emp2=(Employee)JSON.deserialize(json3, Employee.class);
+system.debug('emp2='+emp2);
+Employee emp3=(Employee)JSON.deserializeStrict(json3, Employee.class);
+system.debug('emp3='+emp3);
+
+
+
+Line: 32, Column: 1
+System.JSONException: Unknown field: Employee.empId
+
+
+
+deserializeUntyped(jsonString)
+----------------------------------------
+Deserializes the specified JSON string into collections of primitive data types.
+
+If we dont know which type of class we have to convert the json string into untype then we will go for deseralize untype
+
+
+String json3='{"FirstName":"krishna","LastName":"ram","city":"Hyd","age":23,"empId":4332}';
+system.debug('json3='+json3);
+Object myobj=(Object)JSON.deserializeUntyped(json3);
+system.debug('myobj='+myobj);
+
+
+
+String jsonInput = '{\n' +
+    ' "description" :"An appliance",\n' +
+    ' "accessories" : [ "powerCord", ' + 
+      '{ "right":"door handle1", ' + 
+        '"left":"door handle2" } ],\n' +
+    ' "dimensions" : ' + 
+      '{ "height" : 5.5 , ' + 
+        '"width" : 3.0 , ' + 
+        '"depth" : 2.2 },\n' +
+    ' "type" : null,\n' +
+    ' "inventory" : 2000,\n' +
+    ' "price" : 1023.45,\n' +
+    ' "isShipped" : true,\n' +
+    ' "modelNumber" : "123"\n' +
+    '}';
+
+
+
+"Description": String,
+"accessories":Array[string, object]
+"dimensions": object
+"type":object
+"inventory":Integer
+
+
+Example
+-------------------
+
+String jsonInput = '{' +
+    ' "description" :"An appliance",' +
+    ' "accessories" : [ "powerCord", ' + 
+      '{ "right":"door handle1", ' + 
+        '"left":"door handle2" } ],' +
+    ' "dimensions" : ' + 
+      '{ "height" : 5.5 , ' + 
+        '"width" : 3.0 , ' + 
+        '"depth" : 2.2 },' +
+    ' "inventory" : 2000,' +
+    ' "price" : 1023.45,' +
+    ' "isShipped" : true,' +
+    ' "modelNumber" : "123"' +
+    '}';
+
+public class myCustomObjClass
+{
+    public String left;
+    public String right;
+}
+
+system.debug('jsonInput='+jsonInput);
+Map<String,Object> jsonStr1=(Map<String,Object>)JSON.deserializeUntyped(jsonInput);
+system.debug('jsonStr1='+jsonStr1);
+
+Integer inventory=(Integer)jsonStr1.get('inventory');
+system.debug('inventory='+inventory);
+
+    Boolean isShipped=(Boolean)jsonStr1.get('isShipped');
+system.debug('isShipped='+isShipped);
+
+
+
+
+
+List<Object> accessoriesList=(List<Object>)jsonStr1.get('accessories');
+Map<String,Object> jsonStr2=(Map<String,Object>)accessoriesList[1];
+system.debug('jsonStr2='+jsonStr2);
+////Using Map get the values
+system.debug('jsonStr2 keys='+jsonStr2.keySet());
+system.debug('jsonStr2 Values='+jsonStr2.values());
+system.debug('left Key='+jsonStr2.get('left'));
+
+
+system.debug('accessoriesList='+accessoriesList);
+
+//Using Wrapper Class
+
+String jsStr=JSON.serialize(accessoriesList[1]);
+system.debug('jsStr='+jsStr);
+myCustomObjClass mycustomobj=(myCustomObjClass)JSON.deserialize(jsStr, myCustomObjClass.class);
+system.debug('mycustomobj='+mycustomobj.left);
+
+
+
+
+    
+    
+    
+    Example -2
+------------------------
+system.debug('jsonInput='+jsonInput);
+Map<String,Object> jsonStr1=(Map<String,Object>)JSON.deserializeUntyped(jsonInput);
+system.debug('jsonStr1='+jsonStr1);
+
+////Using Map get the values
+
+Object dimObj= jsonStr1.get('dimensions');
+Map<String,Object> jsonStr3=(Map<String,Object>)jsonStr1.get('dimensions');
+system.debug('jsonStr3 keys='+jsonStr3.keySet());
+system.debug('jsonStr3 values='+jsonStr3.values());
+system.debug('jsonStr3 height='+jsonStr3.get('height'));
+
+
+public class dimensionClass
+{
+    public String depth;
+    public String height;
+    public String width;
+    
+}
+
+//Using Wrapper Class
+Object dimObj2= jsonStr1.get('dimensions');
+system.debug('dimObj2='+dimObj2);
+String jstrStrDim2=JSON.serialize(dimObj2);
+system.debug('jstrStrDim2='+jstrStrDim2);
+
+dimensionClass dimObj3=(dimensionClass)JSON.deserialize(jstrStrDim2,dimensionClass.class);
+system.debug('dimObj height='+dimObj3.height);
+
+
+
+//Deseralize the json into wrapper class
+
+public class FromJson {
+    
+    public cls_invoiceList[] invoiceList;
+    public class cls_invoiceList{
+        public Double totalPrice;
+        public string statementDate;
+        public Cls_lineItems[] lineItems;
+        public Integer invoiceNumber;
+        
+    }
+    public class Cls_lineItems{
+        public Double UnitPrice;
+        public Double Quantity;
+        public string ProductName;
+        
+    }
+    
+    public static FromJson parse(String jsonStr){
+        FromJson jsonss=(FromJson)json.deserialize(jsonStr,FromJson.class);
+        return jsonss;
+       
+    }
+    
+}
+
+    
+    
+Execute anynomous window
+-------------------------------------
+
+ String jsonStr='{"invoiceList":[{"totalPrice":5.5,"statementDate":"2011-10-04T16:58:54.858Z","lineItems":[{"UnitPrice":1.0,"Quantity":5.0,"ProductName":"Pencil"},{"UnitPrice":0.5,"Quantity":1.0,"ProductName":"Eraser"}],"invoiceNumber":1}'+
+',{"totalPrice":11.5,"statementDate":"2011-10-04T16:58:54.858Z","lineItems":[{"UnitPrice":6.0,"Quantity":1.0,"ProductName":"Notebook"},{"UnitPrice":2.5,"Quantity":1.0,"ProductName":"Ruler"},{"UnitPrice":1.5,"Quantity":2.0,"ProductName":"Pen"}],"invoiceNumber":2}]}';
+
+
+FromJson obj=FromJson.parse(jsonStr);
+ system.debug('jsonss='+obj.invoiceList[0].totalPrice);
+system.debug('jsonss='+obj.invoiceList[1].lineItems[0].UnitPrice);
+
+
+JSON Generator
+----------------------
+Using the JSONGenerator class methods, you can generate standard JSON-encoded content.
+You can construct JSON content, element by element, using the standard JSON encoding. To do so, use the methods in the JSONGenerator class.
+
+https://developer.salesforce.com/docs/atlas.en-us.apexref.meta/apexref/apex_class_System_JsonGenerator.htm#apex_class_System_JsonGenerator
+
+Example
+--------------------
+System.JSONGenerator js=JSON.createGenerator(true);
+js.writeStartObject();
+js.writeFieldName('Name');
+js.writeString('sai');
+js.writeStringField('city','Hyd');
+js.writeFieldName('age');
+js.writeNumber(22);
+js.writeBooleanField('IsMarried',false);
+js.writeDateField('DOB',system.today());
+Blob blobValue=Blob.valueOf('myPassword');
+js.writeBlobField('Password',blobValue);
+js.writeEndObject();
+String jsStr=js.getAsString();
+system.debug('jsStr='+jsStr);
+
+
+Example -2 
+------------------
+
+public class JsonExample1 {
+
+    public static String createAccount(String name,String description){
+        System.JSONGenerator js=JSON.createGenerator(true);
+        String result;
+        js.writeStartObject();
+        try{
+            Account acc=new Account();
+            acc.Name=name;
+            acc.Description=description;
+            insert acc;
+            js.writeIdField('Id', acc.Id);
+            js.writeStringField('Status','Success');
+        }
+        catch(Exception e){
+            js.writeStringField('Error', e.getMessage());
+            js.writeStringField('Status','Failed');
+        }
+        js.writeEndObject();
+        result=js.getAsString();
+        
+        return result;
+        
+    }
+    
+}
+
+Execute Anynomous window
+-------------------------------------------
+
+String jsStr=JsonExample1.createAccount('Json Example 1','My Json Example 1 Class');
+system.debug('jsStr='+jsStr);
+
+String jsStr=JsonExample1.createAccount('','');
+system.debug('jsStr='+jsStr);
+
+
+
+Example 2
+--------------
+
+
+public class JsonExample2 {
+    public static String searchAccount(String searchKey){
+     
+       /* {status:, count:, Account:[{},{},.....{}]}
+            {status:, count:, Account:{}}
+        */
+        String searchText=searchKey+' %';
+        String result;
+        system.debug('searchText='+searchText);
+        List<Account> accountList=[SELECT Id, Name, Type FROM Account where Name like :searchText limit 5];
+        system.debug('accountList='+accountList);
+        system.JSONGenerator js= JSON.createGenerator(true);
+        js.writeStartObject();
+        
+        Integer accountSize=accountList.size();
+        if(accountSize > 0){
+            js.writeStringField('Status','Success');
+            
+            js.writeNumberField('count', accountSize);
+            js.writeFieldName('Account');
+            js.writeStartArray();
+            for(Account acc:accountList){
+                js.writeObject(acc);                
+            }
+            js.writeEndArray();
+            
+        }
+        else
+        {
+            js.writeStringField('Status','failure');            
+            js.writeNumberField('count', 0);
+            
+        }
+        js.writeEndObject();
+        result=js.getAsString();
+        return result;
+        
+    }
+}
+
+Execute anynomous window
+---------------------------------
+
+String jsStr=JsonExample2.searchAccount('Test');
+system.debug('jsStr='+jsStr);
+
+Example -2 
+----------------
+
+public class JsonExample3 {
+
+    public static void searchAccount(){
+        String jsonString='{"Status":"Success","Count":2,"Account":[{"Name":"My Account -1","Total_AnnualRevenue__c":23456},'+
+            '{"Name":"My Account -2","Total_AnnualRevenue__c":987654}]}';
+        Map<String,Object> result=new Map<String,Object>();
+        System.JSONParser jp=JSON.createParser(jsonString);
+        while (jp.nextToken() != null) {
+            system.debug('jp.getText()='+jp.getText());
+            system.debug('jp.currentToken()='+jp.getCurrentToken()+'jp.getCurrentName()='+jp.getCurrentName());
+                         
+                         
+                         
+         //parser.getCurrentToken();
+        }
+        
+            
+    }
+    
+}
+Execute aynomous Window
+--------------------------------------
+
+JsonExample3.searchAccount();
+
+
+Example 3
+---------------------
+Execute aynomous Window
+--------------------------------------
+
+String JSONContent = '{"firstName":"John","LastName":"cena","age":30}';
+JSONParser parser = 
+   JSON.createParser(JSONContent);
+// Advance to the next token.
+while (parser.nextToken() != null) {
+    System.debug('Current token: ' +
+        parser.getCurrentToken());
+    if(parser.getCurrentName()=='LastName'){
+        parser.nextToken();
+        System.debug('LastName='+parser.getText());
+    }
+    if(parser.getCurrentName()=='age'){
+        parser.nextToken();
+        System.debug('LastName='+parser.getIntegerValue());
+    }
+}
+
+
+
+Example 4
+-------------------
+
+public class JsonExample3 {
+    
+    public static void parseAccount(){
+        String jsonString='{"Status":"Success","Count":1,"Account":{"Name":"My Account -1","Total_AnnualRevenue__c":23456}}';
+        Map<String,Object> result=new Map<String,Object>();
+        Integer countValue;
+        System.JSONParser jp=JSON.createParser(jsonString);
+        while (jp.nextToken() != null) {
+            String key=jp.getText();
+            if(key=='Count'){
+                jp.nextToken();
+                
+                countValue=(Integer)jp.getIntegerValue();
+                system.debug('countValue='+countValue);
+            }
+            if(key=='Account'){
+                jp.nextToken();
+                Account acc=(Account)jp.readValueAs(Account.class);
+                system.debug('acc='+acc);
+            }
+            system.debug('jp.currentToken()='+jp.getCurrentToken()+'jp.getCurrentName()='+jp.getCurrentName());
+            
+            
+        }
+        
+        
+    }
+    
+}
+
+Storing the 2 Account records statically using readValueAs() method
+-------------------------------------------------------------------------------------
+
+public class JsonExample3 {
+    
+    public static void parseAccount(){
+       String jsonString='{"Status":"Success","Count":2,"Account":[{"Name":"My Account -1","Total_AnnualRevenue__c":23456},'+
+            '{"Name":"My Account -2","Total_AnnualRevenue__c":987654}]}';
+        Map<String,Object> result=new Map<String,Object>();
+        Integer countValue;
+        System.JSONParser jp=JSON.createParser(jsonString);
+        while (jp.nextToken() != null) {
+            String key=jp.getText();
+            if(key=='Count'){
+                jp.nextToken();
+                
+                countValue=(Integer)jp.getIntegerValue();
+                system.debug('countValue='+countValue);
+            }
+            if(key=='Account'){
+                jp.nextToken();
+                jp.nextToken();
+                Account acc1=(Account)jp.readValueAs(Account.class);
+                system.debug('acc='+acc1);
+                jp.nextToken();
+                Account acc2=(Account)jp.readValueAs(Account.class);
+                system.debug('acc='+acc2);
+               
+            }
+            system.debug('jp.currentToken()='+jp.getCurrentToken()+'jp.getCurrentName()='+jp.getCurrentName());
+            
+            
+        }
+        
+        
+    }
+    
+}
+
+
+Storing List of Account records dynamically using readValueAs() method
+-------------------------------------------------------------------------------------------
+
+
+
+public class JsonExample3 {
+    
+    public static void parseAccount(){
+        String jsonString='{"Status":"Success","Count":2,"Account":[{"Name":"My Account -1","Total_AnnualRevenue__c":23456},'+
+            '{"Name":"My Account -2","Total_AnnualRevenue__c":987654}]}';
+        List<Account> accountList=new List<Account>();
+        Map<String,Object> result=new Map<String,Object>();
+        Integer countValue;
+        System.JSONParser jp=JSON.createParser(jsonString);
+        while (jp.nextToken() != null) {
+            String key=jp.getText();
+            if(key=='Count'){
+                jp.nextToken();
+                
+                countValue=(Integer)jp.getIntegerValue();
+                system.debug('countValue='+countValue);
+            }
+            if(key=='Account') 
+            {
+                jp.nextToken();
+                
+                while(jp.nextToken() != JSONToken.END_ARRAY)
+                {
+                    Account acc=(Account)jp.readValueAs(Account.class);
+                    accountList.add(acc);
+                }
+                system.debug('accountList='+accountList);
+            }
+        }
+    }
+}
+
+
+public class JsonExample3 {
+    
+    public static void parseOrderAndOrderItem(){
+        String jsonString='{"Status":"Success","Count":2,'+
+          '"OrderItem":[{"Id":"8020o00000c7iQmAAI","OrderId":"8010o00000L22UcAAJ","Product2Id":"01t0o0000099vZXAAY","ListPrice":100000.00,"CurrencyIsoCode":"USD"},'+
+            '{"Id":"8020o00000c7iQnAAI","OrderId":"8010o00000L22UcAAJ","Product2Id":"01t0o0000099vZQAAY","ListPrice":5000.00,"CurrencyIsoCode":"USD"}],'+
+            '"Order":{"Id":"8010o00000L22UcAAJ","AccountId":"0010o00002kMfYgAAK",'+
+           '"Pricebook2Id":"01s0o000006cadCAAQ","Status":"Draft","OrderNumber":"00000101","RecordTypeId":"0120o000000BHbHAAW",'+
+            '"CurrencyIsoCode":"USD"}}';
+        List<OrderItem> OrderItemList=new List<OrderItem>();
+        Map<String,Object> result=new Map<String,Object>();
+        Integer countValue;
+        System.JSONParser jp=JSON.createParser(jsonString);
+        while (jp.nextToken() != null) {
+            String key=jp.getText();
+            if(key=='Count'){
+                jp.nextToken();
+                
+                countValue=(Integer)jp.getIntegerValue();
+                system.debug('countValue='+countValue);
+            }
+            if(key=='Order') 
+            {
+                
+                while(jp.nextToken() != JSONToken.END_OBJECT)
+                {
+                    Order ord=(Order)jp.readValueAs(Order.class);
+                    system.debug('Order='+ord);
+                }
+                
+            }
+            if(key=='OrderItem') 
+            {
+                jp.nextToken();
+                while(jp.nextToken() != JSONToken.END_ARRAY)
+                {
+                    OrderItem OrderItem=(OrderItem)jp.readValueAs(OrderItem.class);
+                    OrderItemList.add(OrderItem);
+                }
+                system.debug('OrderItem='+OrderItemList);
+            }
+            
+       
+        }
+     
+    }
+}
+
+Execute Anynomous window
+-------------------------------
+JsonExample3.parseOrderAndOrderItem();
+
+
+
+Example 4
+------------------
+
+
+public class JsonExample4 {
+    @future(callout=true)
+    public static void parseJSONResponse() {   
+        Double grandTotal=0;
+        String key;
+        Double listPrice;
+        List<lineItem> myListItem=new List<lineItem>();
+        Http hp=new Http();
+        HttpRequest req=new HttpRequest();
+        String endpoint='https://docsample.herokuapp.com/jsonSample';
+        req.setEndpoint(endpoint);
+        req.setMethod('GET');
+        HttpResponse res=hp.send(req);
+        system.debug('getStatus='+res.getStatus());
+        system.debug('getStatusCode='+res.getStatusCode());
+        system.debug('getHeaderKeys='+res.getHeaderKeys());
+        system.debug('getHeaderKeys='+res.getBody());
+        String jsonString =res.getBody();
+        if(jsonString.length() > 0){
+            System.JSONParser jp=JSON.createParser(jsonString);
+            
+            while(jp.nextToken()!=null){
+                key=jp.getText();
+                if(jp.getCurrentToken()==JSONToken.FIELD_NAME && jp.getText()=='totalPrice'){
+                    jp.nextToken();
+                    grandTotal =grandTotal +jp.getDoubleValue();
+                    
+                }
+                //system.debug('key');
+                if(key == 'lineItems'){
+                    jp.nextToken();
+                    while(jp.nextToken() != JSONToken.END_ARRAY){
+                        listPrice=0;
+                        lineItem li=(lineItem)jp.readValueAs(lineItem.class);
+                        listPrice=li.UnitPrice * li.Quantity;
+                        system.debug('listPrice='+listPrice);
+                        lineItem currentLineItem=new lineItem();
+                        currentLineItem.UnitPrice=li.UnitPrice;
+                        currentLineItem.Quantity=li.Quantity;
+                        currentLineItem.ProductName=li.ProductName;
+                        currentLineItem.listPrice=listPrice;
+                        myListItem.add(currentLineItem);
+                    }
+                }
+            }
+             system.debug('grandTotal='+grandTotal);
+            system.debug('myListItem='+myListItem);
+            
+        }
+       
+        
+        
+    }
+    
+    public class lineItem{
+        Public Double UnitPrice;
+        Public Double Quantity;
+        public String ProductName;
+        public Double listPrice;
+    }
+    
+}
+
+
+Execute Anynomous window
+-------------------------------
+JsonExample4.parseJSONResponse();
+

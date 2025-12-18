@@ -1,0 +1,1419 @@
+Apex Triggers:
+==============
+Triggers are the Custom Apex Code, which will execute the Business Logic automatically based on certain events.
+
+By using Triggers, we can implement the Complex Business Logics, Complex Validations, De-Duplication Processes, and the Complex Transactional Flows.
+
+By using Triggers, we can Perform all the DML operations (INSERT, UPDATE, DELETE, UNDELETE, UPSERT, MERGE) on all object records at a time. And we can retrieve the records from the objects by using SOQL Queries.
+
+Note:
+	Triggers can be fired on both "Before and After" operations on the specified object.
+
+	Validation Rule --> Before Insert, Before Update
+	Formula ---> After Insert, After Update
+	Rollup Summary --> After Insert, After Update, After Delete, After UnDelete
+	Workflow Rule --> After Insert, After Update
+	Process Builder --> After Insert, After Update
+	Sharing Rules --> After Insert, After Update
+	Assignment Rules --> After Insert, After Update
+	
+Note:
+	Each Trigger should be associated with an "Object". And an object can have one or more Triggers.
+	
+Syntax:
+	Trigger <TriggerName> ON <ObjectName>(<Trigger Events>)
+	{
+		// Write the Business Logic..
+	}
+	
+Ex:
+	Trigger AccountsTrigger ON Account(<Trigger Events>)
+	{
+		// Write the Business Logic..
+	}
+	
+	Trigger CaseTrigger ON Case(<Trigger Events>)
+	{
+		// Write the Business Logic..
+	}
+	
+	Trigger PositionTrigger ON Position__C(<Trigger Events>)
+	{
+		// Write the Business Logic..
+	}
+	
+Trigger Events:
+===============
+	By using Trigger Events, we can indicate when the Trigger Should get fired. A Trigger can be get fired on Multiple Events.
+	
+	Apex Provides the below Trigger Events.
+	
+		1. Before Insert:
+			This event will fire the Trigger, Before inserting a New Record inside the object.
+			
+			Note:
+				By using this event, we can implement the Custom Validations, Duplication Elimination Processes, Check the Object Level Permissions, Field Level Permissions,...etc.
+			
+			Ex:
+				Trigger AccountsTrigger ON Account(Before Insert)
+				{
+					// Write the Validations Code,...etc.
+				}
+				
+		2. Before Update:
+			By using this Event, we can fire the Trigger on Before Updating an existing record in the object.
+		
+			Note:
+				By using this Event, we can implement the "Custom Validations, De-Duplication Processes, Check the Record Level Permissions, Check the Object Level Permissions and Check the Field Level Permissions",..etc.
+				
+			Ex:
+				Trigger AccountsTrigger ON Account(Before Update)
+				{
+					// Write the Validations Code,...etc.
+				}
+		
+		3. Before Delete:
+			This event will fire the Trigger on "Before Deleting the Record from the object".
+			
+			Note:
+				By using this event, we can implement the business logic to verify the Record Level Permissions, Object Level Permissions, To Remove the Related Childs in the Lookup Relationships, and To Prevent the Deletion of Childs in Standard Functionalities,..etc.
+		
+			Ex:
+				Trigger AccountsTrigger ON Account(Before Delete)
+				{
+					// Write the Business Logic,...etc.
+				}
+				
+		4. After Insert:
+			This event will fire the Trigger on "After Inserting" a Record inside the object.
+			
+			Note:
+				This event will be used to implement the "Sending the Email Alerts to Users, To Share the Records to the Users, To Assign the Records to the Users and To Update the Rollup Summary Field Values,...etc.".
+				
+			Ex:
+				Trigger AccountsTrigger ON Account(After Insert)
+				{
+					// Write the Business Logic,...etc.
+				}	
+		
+		5. After Update:
+			This Event will fire the Trigger "After Updating an Existing Record" in the object.
+			
+			Note:
+				By using this Event we can implement "Sending the Email Notifications to the Users, Updating the Rollup Summary Field Values, We can implement the Custom Sharing Mechanism, implement the Custom Assignment Rules,...etc.
+			
+			Ex:
+				Trigger AccountsTrigger ON Account(After Update)
+				{
+					// Write the Validations Code,...etc.
+				}		
+		
+		6. After Delete:
+			This event will fire the Trigger "After Deleting an existing Record in the object".
+			
+			Note:
+				By using this event we can Update the Rollup Summary field values.
+				
+			Ex:
+				Trigger AccountsTrigger ON Account(After Delete)
+				{
+					// Write the Business Logic..,...etc.
+				}
+										
+		7. After UnDelete:
+			This event will fire the Trigger "Once a Deleted Record has been Re-Stored back to the actual object".
+			
+			Note:
+				By using this event, we can implement the "Sending Email Alerts, Updating Rollup Summary Field Values, Firing Sharing Rules, Firing Assignment Rules,...etc."
+		
+			Ex:
+				Trigger AccountsTrigger ON Account(After UnDelete)
+				{
+					// Write the Business Logic.,...etc.
+				}	
+				
+	Ex:		
+		Trigger AccountsTrigger ON Account(Before Insert, After Insert, After Update,
+											After Delete)
+		{
+                                                if(Trigger.isInsert || Trigger.isbefore)
+			AccountHandler.doCallAccounts();
+		}
+
+Note:
+	All the Triggers information will get resides inside the "ApexTrigger" object. Each Trigger Code will get stored inside a file with the extension ".apxt".
+	
+Trigger Context Variables:
+==========================
+By using this feature, we can identify the current status of the Trigger. So that we can segregate the code to be executed based on the event.
+
+We have 10 Trigger Context Variables
+
+	1. Boolean Trigger.IsInsert:
+		It returns TRUE, when the Trigger has been fired because of an insert operation. Else it return FALSE.
+	
+	2. Boolean Trigger.IsUpdate:
+		It returns TRUE, if the Trigger has been fired because of an update operation. Else it returns FALSE.
+	
+	3. Boolean Trigger.IsDelete:
+		It returns TRUE, if the Trigger has been fired because of a Delete Operation. Else it returns FALSE.	
+	
+	4. Boolean Trigger.IsUnDelete:
+		It return TRUE, If the Trigger has been fired because of an "UnDelete" operation. Else it returns FALSE.	
+	
+	5. Boolean Trigger.IsBefore:
+		It returns TRUE, If the Trigger is about to perform the operation. Else it returns FALSE.	
+	
+	6. Boolean Trigger.IsAfter:
+		It returns TRUE, if the Trigger has been done with the operation. Else it returns FALSE.
+		
+	7. Boolean Trigger.IsExecuting:
+		It returns TRUE, if the Trigger is currently performing the operation. Else it returns FALSE.
+		(i.e. Current Context is a Trigger. Not a VF Page, Not a WebService Class, and Not an ExecuteAnonymous Call).
+		
+	8. Integer Trigger.Size:
+		It returns the Number of Records has been included in the invocation. Which includes both "Old and New Context Records".
+	
+	9. Trigger.OperationType:
+		It returns the Event Name, because of which the Trigger has been fired.
+		
+		Ex:
+			BEFORE_INERT			AFTER_INSERT
+			BEFORE_UPDATE           AFTER_UPDATE
+			BEFORE_DELETE           AFTER_DELETE
+	                                AFTER_UNDELETE
+									
+	Ex:
+		Trigger AccountsTrigger ON Account(Before Insert, After Update, Before Delete)
+		{
+			Switch ON Trigger.OperationType
+			{
+				When BEFORE_INSERT
+				{
+					// Write the Business Logic..
+				}
+				When AFTER_UPDATE
+				{
+					// Write the Business Logic..
+				}
+				When BEFORE_DELETE
+				{
+					// Write the Business Logic..
+				}
+			}			
+		}
+								
+								(OR)
+								
+		Trigger AccountsTrigger ON Account(Before Insert, After Update, Before Delete)
+		{
+			if(Trigger.isInsert && Trigger.isBefore)
+			{
+				// Write the Business Logic..
+			}
+			
+			if(Trigger.isAfter && Trigger.isUpdate)
+			{
+				// Write the Business Logic..
+			}
+			
+			if(Trigger.isBefore && Trigger.isDelete)
+			{
+				// Write the Business Logic..
+			}
+		}
+		
+	Trigger Code:
+	-------------
+
+  
+                         trigger AccountTrigger on Account (before insert, before update, before
+                                   delete, after insert, after update, after delete,  after undelete) {
+                                       
+                                       switch on Trigger.operationType
+                                       {
+                                           when BEFORE_INSERT
+                                           {
+                                               AccountTriggerHandler.CreateAccounts(Trigger.New);
+                                           }
+                                       }
+                                       
+                                   }
+
+
+                            public class AccountTriggerHandler {
+                            public static void CreateAccounts(List<Account> accs){
+                         for(Account acc:accs){
+                            if(acc.ShippingState!=acc.BillingState){
+    	            acc.ShippingState=acc.BillingState;
+	            }
+	        }
+        
+ 	   }
+	}
+
+		Trigger LeadTrigger ON Lead(Before Insert, Before Update, After Insert)
+		{
+			if( (Trigger.isInsert || Trigger.isUpdate) && Trigger.isBefore )
+			{
+				// Write the Validation Code..
+			}
+			
+			if(Trigger.isAfter && Trigger.isInsert)
+			{
+				// Write the Code to Copy the Lead Into Prospect object.
+				
+				// Write the Code to Send the Email Alert.
+			}
+		}
+
+	10. List<SObjectDataType> Trigger.New:
+			Trigger.New is a Context Variable, which contains the Current Context Records in the form of a List Collection.
+			
+			(i.e. All the Newly Inserting Records will get placed inside the Trigger.New for the Validations).
+			
+			Syntax:
+				List<SObjectDataType> Trigger.New;	
+
+		Note:
+			Trigger.New will be available in "Insert and Update" operations. It will not be available in the Delete operation.
+	
+	11. Trigger.Old:
+			Trigger.Old is Context Variable, which contains the Previous context records in the form of "List Collection".
+			
+			Syntax:
+				List<SObjectDataType> Trigger.Old;
+	
+			Note:
+				Trigger.Old will be available in "Update and Delete" operations. It will not be available in the "Insert" operation.			
+			
+	12. Trigger.OldMap:
+			Trigger.OldMap is Context Variable, which contains the Previous context records in the form of "Map Collection".
+			
+				Where
+						Key --> Record Id
+						Value --> Complete Record	
+						
+			Syntax:
+				Map<ID, SObjectDataType> Trigger.OldMap;
+
+			Note:
+				Trigger.OldMap will be available in "Update and Delete" operations. It will not be available in the "Insert" operation.		
+	
+	13. Trigger.NewMap
+			Trigger.NewMap is Context Variable, which contains the Current context records in the form of "Map Collection".
+			
+				Where
+						Key --> Record Id
+						Value --> Complete Record
+
+			Syntax:
+				Map<ID, SObjectDataType> Trigger.NewMap;
+						
+			Note:
+				Trigger.NewMap will be available in "Insert (After Insert) and Update" operations. It will not be available in the "Delete" operation.	
+						
+Trigger Bulkification:
+======================
+Ex:
+	Trigger AccountsTrigger ON Account(Before Insert)
+	{
+		if(Trigger.IsBefore && Trigger.isInsert)
+		{
+			for(Account acc : Trigger.New) //List<Sobject>
+			{
+				// Write the Validations Code..
+			}			
+		}
+	}
+	
+Ways to Create Trigger:
+=======================
+	2 Ways to Create the Triggers.
+	
+		1. By using Standard Navigation.
+		
+			Setup --> Build --> Develop --> Apex Triggers --> New.
+		
+		2. By using Developer Console.
+			
+			Click on your Name and expand it.
+				1. Click on "Developer Console" link.
+				2. Click on "File --> New --> Apex Trigger" in Developer Console.
+				3. Enter the Trigger Name in the TextBox.
+				4. Select the "ObjectName", from the Picklist.
+				5. Click on "Ok" button.
+				6. Write the Code inside the Editor.
+				7. Save the Code by using "CTRL+S".
+				
+UseCase:
+========
+	Create a Trigger on Account Object, to make sure "Account Industry, Fax and WebSite Fields are Required".
+	
+	Object Name: Account
+	Event Name : Before Insert, Before Update
+	
+	trigger AccountTrigger on Account (before insert, before update) 
+	{
+		if(Trigger.isBefore && (Trigger.IsInsert || Trigger.isUpdate) )
+		{
+			for(Account acc : Trigger.New)
+			{
+				if(acc.Industry == '' || acc.Industry == null)
+				{
+					acc.Industry.AddError('Please Select the Industry Value.');
+				}
+				else if(acc.Fax == '' || acc.Fax == null)
+				{
+					acc.Fax.AddError('Please Enter the Fax Number.');
+				}
+				else if(acc.Website == null || acc.Website == '')
+				{
+					acc.Website.AddError('Please Enter the Customer Website Name.');
+				}
+			}
+		}   
+	}	
+
+UseCase:
+========
+	Create a Trigger on Lead Object, to Auto Populate the Annual Revenue based on the Industry Name as below.
+	
+				Industry Name			AnnualRevenue
+				----------------------------------------
+					Banking					90,00,000
+					Finance					76,00,000
+					Insurance				45,00,000
+					Manufacturing			84,00,000
+					Education				74,00,000
+					Consulting				32,00,000
+					Energy					94,00,000
+					
+	ObjectName: Lead Object
+	Event Name: Before Insert, Before Update
+	
+	trigger LeadTrigger on Lead (before insert, before Update) 
+	{
+		if(Trigger.isBefore && (Trigger.isInsert || Trigger.isUpdate))
+		{
+			for(Lead ldRecord : Trigger.New)
+			{
+				Switch ON ldRecord.Industry
+				{
+					When 'Banking'
+					{
+						ldRecord.AnnualRevenue = 9000000;                    
+					}
+					When 'Finance'
+					{
+						ldRecord.AnnualRevenue = 7600000;
+					}
+					When 'Insurance'
+					{
+						ldRecord.AnnualRevenue = 4500000;
+					}
+					When 'Manufacturing'
+					{
+						ldRecord.AnnualRevenue = 8400000;
+					}
+					When 'Consulting'
+					{
+						ldRecord.AnnualRevenue = 3200000;
+					}
+					When 'Education'
+					{
+						ldRecord.AnnualRevenue = 7400000;
+					}
+					When 'Energy'
+					{
+						ldRecord.AnnualRevenue = 9400000;
+					}                
+				}
+			}
+		}
+	}
+	
+Note:
+	Upon firing the Trigger, If the Record contains both "Validation Rule and Before Trigger" on the same field. Then it will fire the "Before Trigger First". And then it will fire the Validation Rule.
+	
+UseCase:
+========
+
+
+
+
+	Create a Trigger on the Account Object, to Prevent the Deletion of an Active Account Record.
+	
+	ObjectName: Account Object
+	Event Name: Before Delete
+	
+	trigger AccountTrigger on Account (before delete) 
+	{
+		if(Trigger.isBefore && Trigger.isDelete)
+		{
+			for(Account acc : Trigger.Old)
+			{
+				if(acc.Active__c == 'Yes')
+				{
+					acc.AddError('You Are Not Authorized to Delete an Active Account Record.');
+				}
+			}
+		}
+	}	
+
+
+
+trigger AccountTrigger on Account (before insert, before update, before
+                                   delete, after insert, after update, after delete,  after undelete) {
+                                       if(Trigger.Isbefore && Trigger.isDelete){
+                                           AccountDeleteHandler acc=new AccountDeleteHandler();
+                                           acc.deleteAccounts(Trigger.old);
+                                       }
+                                   }
+
+
+public class AccountDeleteHandler {
+    public void deleteAccounts(List<Account> accs){
+        for(Account ac:accs){
+            if(ac.Active__c =='yes'){
+                ac.addError('dont delete da');
+            }
+        }
+        
+    }
+}
+	
+Assignments:
+============
+	1. Create a Trigger on the Position Object, to make sure the "Minimum Pay Field and Contact Number Fields are Required".
+	
+if(Trigger.isbefore && Trigger.isInsert){
+
+for(Position__c pos:Trigger.New){
+
+   if(pos.Minimum_Pay__c!=null && pos.Minimum_Pay__c!=''){
+          pos.addError('Enter min field')
+}
+ if(pos.Contact_Number__c!=null) {
+    pos.addError('Enter Contact Number field')
+}
+}
+
+
+	2. Create a Trigger on the Lead object, to MakeSure the Lead Address should be Mandatory. (i.e. Street, City, State, PostalCode, Country)
+	
+	3. Create a Trigger on the Case Object, to make sure each Case Record should be Associated with an "Account and Contact".
+	
+	4. Create a Trigger on the Contact Object, to make sure each Contact Record should be associated with an "Account".
+
+UseCase:
+========
+	Create a Trigger on the Hiring Manager Object, to maintain the Uniqueness of the Records based on the "Hiring Manager Name and Contact Number combination".
+	
+	ObjectName: Hiring_Manager__C
+	Event Name : Before Insert, Before Update
+
+
+
+trigger HiringManagerTrigger on Hiring_Manager__c (before insert, before update) 
+	{
+		if(Trigger.isBefore && (Trigger.isInsert || Trigger.isUpdate))
+		{
+			for(Hiring_Manager__C hrRecord : Trigger.New)
+			{
+				integer recordsCount =[Select count() from Hiring_Manager__C
+													Where name =: hrRecord.Name and 
+															contact_number__C =: hrRecord.Contact_Number__c];
+				
+				if(recordsCount > 0)
+				{
+					hrRecord.AddError('Duplicate Record Found with the Same Details. Record Cannot be Acceptable.');
+				}
+			}
+		}
+	}
+
+
+//Restricting duplicate records
+trigger AccountTrigger on Account (before insert, before update, before
+                                   delete, after insert, after update, after delete,  after undelete) {
+                                      
+                                       if(Trigger.isBefore && (Trigger.isInsert))
+                                       {
+                                           AccountTriggerHandler.checkDuplicateAccounts(Trigger.New);
+                                       }
+                                   }
+
+public class AccountTriggerHandler {
+   
+    public static void checkDuplicateAccounts(List<Account> newAccountRecords){
+        List<Account> oldAccountRecords=[SELECT Id,Name,Phone FROM Account];
+        if(!oldAccountRecords.isEmpty()){
+            for(Account oldAct:newAccountRecords){
+                for(Account newAct:oldAccountRecords)
+                {
+                    if(oldAct.Name==newAct.Name && oldAct.Phone==newAct.Phone)
+                    {
+                        oldAct.addError('duplicate account found and existing record name is='+oldAct.Name);
+                            }
+                }
+                
+            }
+        }
+    }
+}
+
+
+
+// When a new line item is added to an opportunity, this trigger copies the value of the
+// associated product's color to the new record.
+
+
+
+Opportunity (Pricebook - A)                                           Pricebook - A                                                                          product  (Field=Colour__c)
+                                                                                            |                                                                                            |
+                                                                                           pricebookEntry - 1, pricebookEntry - 2                           pricebookEntry(Pricebook-A, Pricebook - B) 
+ ----
+opportunity Line Item (field=Colour__c)
+
+
+trigger oppLineTrigger on OpportunityLineItem (before insert) {
+
+    // For every OpportunityLineItem record, add its associated pricebook entry
+    // to a set so there are no duplicates.
+    Set<Id> pbeIds = new Set<Id>();
+    for (OpportunityLineItem oli : Trigger.new) 
+        pbeIds.add(oli.pricebookentryid);
+
+    // Query the PricebookEntries for their associated product color and place the results
+    // in a map.
+    Map<Id, PricebookEntry> entries = new Map<Id, PricebookEntry>(
+        [select product2.color__c from pricebookentry 
+         where id in :pbeIds]);
+         
+    // Now use the map to set the appropriate color on every OpportunityLineItem processed
+    // by the trigger.
+    for (OpportunityLineItem oli : Trigger.new) 
+        oli.color__c = entries.get(oli.pricebookEntryId).product2.color__c;  
+}
+
+
+Parent to child SOQL Query
+---------------------------------------
+List<Account> accs=[select Id,Name,(Select Id,FirstName from contacts) from Account where Id='0010o00002BTo4lAAD'];
+for(Account acc:accs){
+system.debug('acc='+acc);
+    for(Contact con:acc.contacts){
+        system.debug('con='+con);
+    }
+}
+
+
+Correlating Records with Query Results in Bulk Triggers
+---------------------------------------------------------------------------
+Use the Trigger.newMap and Trigger.oldMap ID-to-sObject maps to correlate records with query results. For example, this trigger from the sample quoting app uses Trigger.oldMap to create a set of unique IDs (Trigger.oldMap.keySet()). The set is then used as part of a query to create a list of quotes associated with the opportunities being processed by the trigger. For every quote returned by the query, the related opportunity is retrieved from Trigger.oldMap and prevented from being deleted:
+
+//bad Logic
+trigger OpportunityTrigger on Opportunity (before delete) {
+    for(Opportunity opty:Trigger.old){
+       Quote qq= [SELECT Id, Name, OpportunityId FROM Quote where OpportunityId=:opty.Id limit 1];
+        if(qq!=null)
+        {
+            opty.addError('This opportunity is having quote u cant delete');
+        }
+    }
+
+}
+
+//Simplified 
+trigger OpportunityTrigger on Opportunity (before delete) {
+    
+    for(Quote qq:[SELECT Id, Name, OpportunityId FROM Quote where OpportunityId IN:Trigger.old]){
+        Map<Id,Opportunity> oppMap=Trigger.oldMap;
+       Opportunity opty=oppMap.get(qq.OpportunityId);
+        opty.addError('This opportunity is having quote u cant delete');
+        
+    }
+        
+    
+}
+
+//Advanced
+
+trigger oppTrigger on Opportunity (before delete) {
+    for (Quote__c q : [SELECT opportunity__c FROM quote__c 
+                       WHERE opportunity__c IN :Trigger.oldMap.keySet()]) {
+        Trigger.oldMap.get(q.opportunity__c).addError('Cannot delete 
+                                                       opportunity with a quote');
+    }
+}
+UseCase:
+========
+	Create a Trigger to Prevent the Deletion of the Related Contact Records, upon removing the Account Record from the Object.
+	
+	ObjectName : Account Object.
+	Event Name : Before Delete
+	
+	trigger PreventContactsDeletionTrigger on Account (before delete) 
+	{
+		if(Trigger.isBefore && Trigger.isDelete)
+		{
+			List<Contact> lstContacts = [Select id, firstname, lastname, accountid
+													from Contact
+														Where accountid IN : Trigger.OldMap.KeySet()];
+			
+			if(! lstContacts.isEmpty())
+			{
+				for(Contact con : lstContacts)
+				{
+					con.AccountId = null;
+				}
+				
+				update lstContacts;
+			}
+		}
+	}
+	
+Assignment:
+===========
+	1. Create a Trigger on the Hiring Manager Object, to Remove all the Related Position
+		Records upon removing the Hiring Manager Record from the object.
+	
+		Hiring Manager (Parent)
+			^
+			|             (Lookup Relationship)
+			|
+			 --- Position (Child)
+
+
+
+
+trigger OpportunityTrigger on Opportunity (before delete) {
+    
+    List<Quote> qqList=[SELECT Id, Name, OpportunityId FROM Quote where OpportunityId IN:Trigger.old];
+    delete qqList;
+    
+    
+    
+}
+			 
+UseCase:
+========
+	Create a Trigger to Synchronize the Account Record Changes into the Related Contact Record fields as below.
+	
+			Source Field						Target Field
+			-----------------------------------------------------------
+			Account:Phone				--->  Contact:Phone
+		    Account:Fax                 --->  Contact:Fax
+	        Account:BillingStreet       --->  Contact:MailingStreet
+	        Account:BillingCity         --->  Contact:MailingCity
+	        Account:BillingState        --->  Contact:MailingState
+	        Account:BillingPostalCode   --->  Contact:MailingPostalCode
+			Account:BillingCountry      --->  Contact:MailingCountry
+	
+	Object Name: Account Object
+	Event Name : After Update
+	
+	trigger PreventContactsDeletionTrigger on Account (After Update) 
+	{
+		if(Trigger.isAfter && Trigger.isUpdate)
+		{        
+			// Get the Related Contacts based on the Updated Accounts.
+			List<Contact> lstContacts = [Select id, firstname, lastname, phone, fax, accountid,
+												mailingStreet, mailingCity, mailingState, mailingCountry, mailingPostalCode
+														from Contact
+																Where accountid in : Trigger.NewMap.KeySet() ];
+			
+			if(! lstContacts.isEmpty())
+			{
+				for(Contact con : lstContacts)
+				{
+					/*
+					con.Phone = Trigger.NewMap.Get(con.AccountId).phone;
+					con.Fax = Trigger.NewMap.Get(con.AccountId).Fax;
+					con.MailingStreet = Trigger.NewMap.Get(con.AccountId).BillingStreet;
+					con.MailingCity = Trigger.NewMap.Get(con.AccountId).BillingCity;
+					con.MailingState = Trigger.NewMap.Get(con.AccountId).BillingState;
+					con.MailingPostalCode = Trigger.NewMap.Get(con.AccountId).BillingPostalCode;
+					con.MailingCountry = Trigger.NewMap.Get(con.AccountId).BillingCountry;
+					*/
+					
+					Account acc = Trigger.NewMap.Get(con.AccountId);
+					
+						con.Phone = acc.Phone;
+						con.Fax = acc.Fax;
+						con.MailingCity = acc.BillingCity;
+						con.MailingState = acc.BillingState;
+						con.MailingStreet = acc.BillingStreet;
+						con.MailingPostalCode = acc.BillingPostalCode;
+						con.MailingCountry = acc.BillingCountry;                        
+				}
+				
+				update lstContacts;
+			}
+		}
+	}
+	
+	
+Custom Settings:
+================
+
+	2 Types of Custom Settings.
+	
+		1. List Custom Settings:
+			Data can be accessible in the entire organization.
+				|
+				 --> Accessed through Apex, VF, WebServices, API's.
+		
+		2. Hierarchy Custom Settings:
+			Data can be accessible based on the "User and Profile".
+				|
+				 --> Accessed through Apex, VF, WebServices, API's, Formula Fields.
+			
+	Storage Limitation:
+	-------------------
+		Organization Wide : Max. of 10 MB Storage.
+		
+			Salesforce Licenses : 1 MB 
+			2 Salesforce Licenses : 2 MB 
+			5 Salesforce Licenses : 5 MB
+			10 Salesforce Licenses : 10 MB 
+			15 Salesforce Licenses : 10 MB 
+		
+		Free Developer Edition : (2 Salesforce Licenses) - 2 MB.
+		
+/*
+	<CustomSettingName>.GetAll()
+	<CustomSettingName>.GetInstance()
+	<CustomSettingName>.GetValues()
+*/    
+// Get All the Records from the CustomSetting.
+	Map<String, RegionDetails__c> regDetails = RegionDetails__c.GetAll();
+	
+	for(RegionDetails__c reg : regDetails.Values())
+    {
+        system.debug('Region Details..: '+ reg);
+    }
+
+// Get a Specific Region Information..
+	system.debug('Americas Region Details..: '+ RegionDetails__C.GetInstance('Americas'));
+
+// Get the Region Manager Name of the specified Region..
+	System.debug('Middle East Region Manager Name....: '+ RegionDetails__C.GetValues('Middle East').Region_Manager_Name__c);
+
+Lead Conversion Process:
+========================
+
+	Lead --> Person / Organization / Business 
+				|
+				 --> Showed interest in our products / services.
+				 
+	Campaigns 
+	
+	Marketing Team --> Campaigns <-- Leads
+									   |
+									   |
+									    --> Sales Team.
+												
+	
+	Lead (3 Mandatory Fields: LastName, Company, Status)
+	  |
+	   --> Ready To Buy the Product
+				|
+				 --> Convert
+						|
+						 --> Customer 
+								|
+								 ---> 3 Records.
+											1. Account Record
+											2. Contact Record
+											3. Opportunity Record
+											
+	Lead Record Details(Source)				Target Records
+	---------------------------------------------------------------
+	Lead:FirstName	--> Convert ---> Contact:FirstName
+	Lead:LastName          --> Convert ---> Contact:LastName
+	Lead:Title                 --> Convert ---> Contact:Title
+	Lead:Phone              --> Convert ---> Contact:Phone, Account:Phone
+	Lead:Mobile             --> Convert ---> Contact:Mobile
+	Lead:Fax                --> Convert ---> Contact:Fax, Account:Fax
+	Lead:Email              --> Convert ---> Contact:Email
+	Lead:Industry           --> Convert ---> Account:Industry
+	Lead:Rating             --> Convert ---> Account:Rating
+	Lead:AnnualRevenue      --> Convert ---> Account:AnnualRevenue
+	Lead:Status             --> Convert ---> 
+	Lead:City               --> Convert ---> Account:BillingCity, Contact:MailingCity
+	Lead:Street             --> Convert ---> Account:BillingStreet, Contact:MailingStreet
+	Lead:State              --> Convert ---> Account:BillingState,	 Contact:MailingState
+	Lead:PostalCode         --> Convert ---> Account:BillingPostalCode,
+											 Contact:MailingPostalCode
+	Lead:Country            --> Convert ---> Account:BillingCountry,
+											 Contact:MailingCountry
+	Lead:Company            --> Convert ---> Account:Name, Opportunity:Name
+	...
+	
+	PAN Number__C			-->	Convert	---> Account:PanNumber__C
+	PassportNumber__C 		--> Convert ---> Contact:PassportNumber__C
+	
+	Hidden Fields (Lead):
+	--------------------
+		1. IsConverted: Boolean
+				|
+				 --> Lead:IsConverted --> TRUE (Converted Lead)
+					 Lead:IsConverted --> FALSE (Not Converted / UnConverted Lead)
+					 
+		2. ConvertedAccountID:
+				|
+				 --> Contains the Account Record ID has been generated due to the Lead
+					Conversion.
+					
+		3. ConvertedContactID:
+				|
+				 --> Contains the Contact Record ID has been generated due to the Lead
+					Conversion.
+					
+		4. ConvertedOpportunityID:
+				|
+				 --> Contains the Opportunity Record ID has been generated due to the Lead
+					Conversion.
+	
+Database.LeadConvert Class:
+===========================
+In Salesforce, we have to convert the lead records seperately one by one. We don't have such options, to convert bulk lead records at a time.
+
+By using "Database.LeadConvert" class, we can convert one or more lead records through programatically at a time.
+
+To hold the Lead record details, we have to create the object of "Database.LeadConvert" class.
+
+Ex:
+	Database.LeadConvert lconvert = new Database.LeadConvert();
+	
+Ex: To Hold the Multiple Lead Records to be get Converted, We have to use "List"
+	Collection.
+	
+	List<Database.LeadConvert> lstConvert = new List<Database.LeadConvert>();
+	
+Methods:
+--------
+Database.LeadConvert class provides a set of methods, which are used to describe the conversion settings.
+
+1. SetLeadId(<Lead Record ID>):
+	It is used to specify the "Lead RecordID" to be get converted.
+	
+	Ex:
+		lconvert.SetLeadId('00Q23423423');
+		
+2. SetSendNotificationEmail(<Boolean>):
+	It is used to indicate to send the Email Notification to Lead Record owner, regarding the Lead Conversion.
+	
+	Ex:
+		lconvert.SetSendNotificationEmail(true);
+		
+3. SetDoNotCreateOpportunity(<Boolean>):
+	By using this method, we can prevent the generation of an opportunity record, upon lead conversion.
+	
+	TRUE --> Opportunity will not created.
+	FALSE --> Opportunity record will get created.
+	
+	Ex:
+		lconvert.SetDoNotCreateOpportunity(false);
+		
+4. SetConvertedStatus(string):
+	This method is used to indicate the status to be assigned to the LEad, once it get converted.
+	
+	All the "LeadStatus" values exist in "LeadStatus" object, We can query the values as below.
+	
+	string LeadStatusValue = [select masterlabel from
+							LeadStatus where isConverted= true];
+	
+	Ex:
+		lconvert.SetConvertedStatus(LeadStatusValue);
+	
+
+5. Database.ConvertLead(List<ID>):
+	This method is used to Convert the specified lead record id's.
+	
+	We can track the Lead Conversion status of each lead record by using "Database.LeadConvertResult[]" class.
+	
+	Ex:
+		Database.LeadConvertResult[] results = Database.ConvertLead(List<LeadID>);
+	
+UseCase:
+========
+	Create a Trigger to Auto-Convert the Lead Records as the Customers upon Changing the Lead Status as "Closed - Converted".
+	
+	Object Name: Lead Object
+	Event Name : After Update
+	
+	Pre-Requisite:
+		Create a CheckBox Field with the name "Do Not Create Opportunity" in the Lead Object.
+	
+	trigger AutoLeadConvertTrigger on Lead (After Update) 
+	{
+		if(Trigger.isAfter && Trigger.isUpdate)
+		{
+			LeadStatus lStatus = [Select id, MasterLabel, isConverted
+											from LeadStatus
+												Where isConverted = true];
+			
+			List<Database.LeadConvert> lstConvert = new List<Database.LeadConvert>();       
+			
+			for(Lead ldRecord : Trigger.New)
+			{
+				if(ldRecord.Status == 'Closed - Converted' && ldRecord.IsConverted == false)
+				{
+					Database.LeadConvert lConvert = new Database.LeadConvert();
+					
+						lConvert.setLeadId(ldRecord.Id);
+						
+						lConvert.setDoNotCreateOpportunity(ldRecord.Do_Not_Create_Opportunity__c);
+					
+						lConvert.setSendNotificationEmail(true);
+					
+						lConvert.setConvertedStatus(lStatus.MasterLabel);
+					
+					// Add the record to Collection..
+					lstConvert.Add(lConvert);
+				}
+			}
+			
+			if(! lstConvert.isEmpty())
+			{
+				Database.LeadConvertResult[] result =	Database.convertLead(lstConvert, false);
+			}
+		}
+	}
+	
+Trigger Handler Factory:
+========================
+Trigger Code:
+-------------
+trigger AutoLeadConvertTrigger on Lead (After Update) 
+{
+	if(Trigger.isAfter && Trigger.isUpdate)
+    {
+        LeadHandlerUtility.AfterUpdate(Trigger.New);
+    }
+}
+
+LeadHandlerUtility Class Code:
+------------------------------
+public class LeadHandlerUtility 
+{   
+	Public static void AfterUpdate(List<Lead> lstLeads)
+    {
+        // Get Lead Status Values..
+        LeadStatus lStatus = [Select id, MasterLabel, isConverted
+                             			from LeadStatus
+                             					Where isConverted = true
+                             						Limit 1];
+        
+        // Create a Collection to Hold all the Lead Records, which needs to be get Converted.
+        List<Database.LeadConvert> leadsToConvert = new List<Database.LeadConvert>();
+        
+        // Trigger.New --> Contains All the recently updated Lead Records.
+        for(Lead ldRecord : lstLeads)
+        {
+            if(ldRecord.Status == 'Closed - Converted' && ldRecord.IsConverted == false)
+            {
+            	// Store the Lead Record details inside the "Database.LeadConvert" Class.
+            	Database.LeadConvert ldConvert = new Database.LeadConvert();
+            
+            	ldConvert.setLeadId(ldRecord.Id);
+                ldConvert.setSendNotificationEmail(true);
+                ldConvert.setDoNotCreateOpportunity(ldRecord.Do_Not_Create_Opportunity__c);
+                ldConvert.setConvertedStatus(lStatus.MasterLabel);
+                
+                // Add the record to Collection..
+                leadsToConvert.Add(ldConvert);
+            }   
+        }
+        
+       // Convert the Lead Records as Customers.
+       if(! leadsToConvert.isEmpty())
+       {
+           Database.LeadConvertResult[] results = Database.convertLead(leadsToConvert, false);
+       }
+    }
+}
+
+UseCase:
+========
+	Create the Triggers to Synchronize the Records between the Hiring Manager and Recruiter Objects.
+	
+		1. Upon Creating Hiring Manager: 
+			Copy the Record into the Recruiter Object.(Creation of  Recruiter)
+
+		2. Once the Hiring Manager Record has been Updated:
+			Sync the Changes into the Associated Child Record.
+
+		3. Once the Recruiter Record has been Updated:
+			Sync the Changes to the Associated Hiring Manager Record.
+
+Hiring Manager Trigger:
+-----------------------
+trigger SyncHiringManagerRecordsTrigger on Hiring_Manager__c (after insert, after update) 
+{
+  if(Trigger.isAfter && Trigger.isInsert)
+    {
+        HiringManagerSyncHandler.AfterInsert(Trigger.New);
+    }
+    
+    if(Trigger.isAfter && Trigger.isUpdate)
+    {
+        Map<ID, Hiring_Manager__C> hrRecordsUpdated = new Map<ID, Hiring_MAnager__C>();
+        
+        for(Hiring_Manager__C hr : Trigger.New)
+        {
+            // Check weather the HR Record has been modified.
+            if( (Trigger.OldMap.Get(hr.Id).Name != hr.Name) || 
+                 (Trigger.oldMap.Get(hr.Id).Location__C != hr.Location__c) ||
+                 (Trigger.OldMap.Get(hr.id).Contact_Number__C != hr.Contact_Number__c) ||
+                (Trigger.oldMap.Get(hr.id).Email_id__C != hr.Email_ID__c) )
+            {
+                hrRecordsUpdated.Put(hr.Id, hr);
+            }
+        }
+        
+        if(! hrRecordsUpdated.isEmpty())
+        {
+          HiringManagerSyncHandler.AfterUpdate(hrRecordsUpdated);    
+        }         
+    }
+}
+
+Hiring Manager Handler Class:
+-----------------------------
+/*
+ * @ Author : Feroz Baig
+ * @ Description : This Class Contains all the Business Logics to be used to Synchronize the 
+ *           Data from Hiring Manager to Recruiter and Vice-Versa.
+ * @ Version : 1.0
+ * @ Created Date : May 28,2020
+ * @ References : SyncHiringManagerRecordsTrigger
+ * @ Modified By : 
+ *   Modifed By    Modifed Date    Reason
+ *  -------------------------------------------
+ *  Shiva       May 28, 2020    Due to Fix the Defect #23890
+ */
+public class HiringManagerSyncHandler 
+{
+    /*
+    *  @ Method Name : AfterInsert
+    *  @ Description : This Method will Create the Recruiter Records based on the Hiring Manager
+            Record Details.
+    *   @ Parameters:
+    *     @Param Name : lstHRRecords  @Type : List<Hiring_Manager__C>         
+    *   @ Returns : N/A
+    *   @ Throws : N/A
+    *   @ References : SyncHiringManagerRecordsTrigger
+    *   @ Version : 1.0
+    */
+    
+  Public static void AfterInsert(List<Hiring_Manager__C> lstHRRecords)
+    {
+        if(! lstHRRecords.isEmpty())
+        {
+            List<Recruiter__C> lstRecruiters = new List<Recruiter__C>();
+            
+            for(Hiring_Manager__C hr : lstHRRecords)
+            {
+                // Create a Recruiter Record..
+                Recruiter__C rec = new Recruiter__C();
+                
+                  rec.Name = hr.Name;
+                  rec.Location_Name__c = hr.Location__c;
+                  rec.Contact_Number__c = hr.Contact_Number__c;
+                  rec.Email_Address__c = hr.Email_ID__c;
+                
+                  rec.HiringManagerID__c = hr.Id;
+                
+                // Add the record to Collection..
+                  lstRecruiters.Add(rec);                
+            }
+            
+            // Insert the Records..
+            if(! lstRecruiters.isEmpty())
+            {
+                insert lstRecruiters;
+            }
+        }
+    }
+    
+    /*
+    *  @ Method Name : AfterUpdate
+    *  @ Description : This Method will Synchronize the Related Recruiter Records based on the latest
+            values of Hiring Manager Records.
+    *   @ Parameters:
+    *     @Param Name : mapHRRecords  @Type : Map<ID, Hiring_Manager__C>       
+    *   @ Returns : N/A
+    *   @ Throws : N/A
+    *   @ References : SyncHiringManagerRecordsTrigger
+    *   @ Version : 1.0
+    */
+    Public static void AfterUpdate(Map<ID, Hiring_Manager__C> mapHRRecords, Boolean isActive)
+    {
+      List<Recruiter__C> lstRecruiters = [Select id, name, location_name__c, email_address__C,
+                                                   contact_number__C, hiringmanagerid__C
+                                                       from Recruiter__C
+                                                         Where hiringmanagerid__C IN : mapHRRecords.KeySet()];
+        
+        if(! lstRecruiters.isEmpty())
+        {
+            List<Recruiter__C> recruitersToUpdate = new List<Recruiter__C>();
+            
+            for(Recruiter__C rec : lstRecruiters)
+            {
+                Hiring_Manager__C hr = mapHRRecords.Get(rec.HiringManagerID__c);
+                
+                    rec.Name = hr.Name;
+                    rec.Location_Name__c = hr.Location__c;
+                    rec.Email_Address__c = hr.Email_ID__c;
+                    rec.Contact_Number__c = hr.Contact_Number__c;
+                
+                recruitersToUpdate.Add(rec);
+            }
+            
+            if(! recruitersToUpdate.isEmpty())
+            {
+                Update recruitersToUpdate;
+            }
+        }
+    }
+}			
+			
+
+Trigger Best Practices:
+=======================
+1. Trigger should support bulk records as well - Always use "For Loop" to process records inside the trigger.
+
+2. Always check for null pointer exceptions.
+
+3. Always use try and catch block in the trigger to handle Exceptions.
+
+4. Differentiate events with separate blocks to avoid usage of trigger.new and trigger.old
+
+5. Do not use DML operations inside the for loop. Add them to the list and update/insert/delete the list out side the for loop.
+
+6. Do not use SOQL and SOSL statements inside for loop.
+
+7. Write the Proper Test Classes for the Trigger. And maintain minimum 1% of code coverage for each trigger. And Overall organization wide, we have to maintain 75% of code coverage while moving the code from sandbox to production environment.
+
+8.Avoid recursiveness in triggers by putting the proper conditions.
+
+Note:
+     Recursive Triggers can be avoided by using the "Static Boolean" variables.
+
+     Do not execute the trigger on all the update. Only execute the trigger on specific update.
+
+     Here the trigger will get executed on update of stagename field only and will not trigger on other field's update
+
+     To avoid recursive use the below code:
+
+     if(Trigger.isUpdate && opp.stagename == 'Qualification'  && opp.stagename != Trigger.oldMap.get(opp.id).stagename)
+
+    opptyIds.add(opp.Id);
+
+    Error Code:
+
+   if(Trigger.isUpdate && opp.stagename == 'Qualification')
+		opptyIds.add(opp.Id);	
+ 
+9. As a Best Practice, it is Recommended to maintain only One Trigger per an Object. Because, We don't have the option in salesforce to control the execution order of triggers.
+
+10. It is recommended to maintain Trigger Handler Factory.(i.e instead of writing the Trigger code inside the Trigger, we can write the code in a Class and call the class from the trigger.)
+
+Order of Execution in Triggers in Salesforce:
+=============================================
+1. The original record is loaded from the database (or initialized for an insert statement)
+
+2. The new record field values are loaded from the request and overwrite the old values
+
+3. All before triggers execute (TRIGGERS)
+
+4. System validation occurs, such as verifying that all required fields have a non-null value, and running any user-defined validation rules (VALIDATIONS)
+
+5. The record is saved to the database, but not yet committed
+
+6. All after triggers execute
+
+7. Assignment rules execute
+
+8. Auto-response rules execute
+
+9. Workflow rules executed (WORKFLOW)
+
+10. If there are workflow field updates, the record is updated again.
+
+11. If the record was updated with workflow field updates, before and after triggers fire one more time (and only one more time) along with Standard Validation Rules. (Note: In this case, Custom validation rules will not fire.)
+
+12. Escalation rules execute.
+
+13. All DML operations are committed to the database
+
+14. Post-commit logic executes, such as sending email.
+
+Assignment:
+===========
+	1. Implement the Rollup Summary Functionality between Account and Case Object.
+				
+		1. Create a Trigger on "Case Object".
+		2. Add the Events:
+				1. AFTER INSERT
+				2. AFTER UPDATE
+				3. AFTER DELETE
+				4. AFTER UNDELETE
+
+		Pre-Requisite: Create a Number DataType Field in "Account Object", to Store the
+						Number of Related Cases available for each Account.
+						
+
+Opportunity              Account
+op-1	                 001
+op-2		 002
+op-3                           001	
+op-4                          002	
+op-5                          001
+
+oo1 - 3 (op1,op3,op5)
+oo2 - 2 (op2,op4)
+
+Map<AccountId,List<opportunity>>
+001 (AccountId)(op1,op3)   
+
+Map<AccountId,List<opportunity>>
+oo2(AccountId)(op2)
+
+
+						
+	
+	
+trigger CaseTrigger on Case (after insert,after update,after delete,after undelete) {
+    if(Trigger.isAfter && Trigger.isInsert){
+        CaseTriggerHandler.afterInsert(Trigger.New);
+    }
+    if(Trigger.isAfter && Trigger.isUpdate){
+        CaseTriggerHandler.afterInsert(Trigger.New);
+    }
+    if(Trigger.isAfter && Trigger.isDelete){
+        CaseTriggerHandler.afterInsert(Trigger.old);
+    }
+     if(Trigger.isAfter && Trigger.isUndelete){
+        CaseTriggerHandler.afterInsert(Trigger.New);
+    }
+    
+}
+
+
+
+public class CaseTriggerHandler {
+    
+    public static void afterInsert(List<case> caseList){
+        Map<Id,List<Case>> caseMap=new Map<Id,List<Case>>();
+        for(Case cs:caseList){
+            List<Case> tempCaseList=new List<Case>();
+            //Check key is exist or not
+            if(!caseMap.containsKey(cs.AccountId))
+            {
+                tempCaseList.add(cs); 
+                caseMap.put(cs.AccountId,tempCaseList);
+            }
+            else
+            {
+                tempCaseList=caseMap.get(cs.AccountId);
+                tempCaseList.add(cs);
+                caseMap.put(cs.AccountId,tempCaseList);
+            }
+        }
+        //Store the AccountId and count of Case records
+        Map<Id,Integer> AccountCaseCountMap=new Map<Id,Integer>();
+        for(Id accountId:caseMap.keySet()){
+            List<Case> updateCaseList=caseMap.get(accountId);
+            AccountCaseCountMap.put(accountId,updateCaseList.size());
+            
+        }
+        system.debug('AccountCaseCountMap='+AccountCaseCountMap);
+        List<Account> accounts=[select Id,Number_of_Related_Cases__c,(Select Id,Subject from Cases ) from Account where Id In:AccountCaseCountMap.keySet()];
+        for(Account acc:accounts)
+        {
+            system.debug('cases='+acc.Cases.size());
+            acc.Number_of_Related_Cases__c=acc.Cases.size();
+        }
+        update accounts;
+    }
+    
+}
+
+
+UseCase
+-------------
+1. Whenever opportunity stageName is modified as closed won then set the closed date as Today and customer as new Customer
+
+
+trigger OpportunityTrigger on Opportunity (before update) {
+    
+       OpportunityTriggerHander.updateClosedDate(Trigger.oldMap,Trigger.NewMap);
+    
+}
+
+
+
+public class OpportunityTriggerHander {
+
+    public static void updateClosedDate(Map<Id,Opportunity> oldMap,Map<Id,Opportunity> newMap){
+        for(Id key:oldMap.keySet()){
+           Opportunity oldOpportunity=oldMap.get(key);
+            Opportunity newOpportunity=newMap.get(key);
+            
+            if(oldOpportunity.StageName!='Closed Won' && newOpportunity.StageName=='Closed Won')
+            {
+                newOpportunity.CloseDate=system.Today();
+                newOpportunity.Type='New Customer';
+            }
+        }
+    }
+}
+
+
+	
+Events              Trigger.New          Trigger.NewMap         Trigger.old               Trigger.oldMap
+--------------------------------------------------------------------------------------------------------------------
+                   R          W	             R			  W	   				  R	 		  W	      		 R	        W
+
+
+Before Insert      Y          Y              N           N                  N           N                 N              N
+
+After Insert       Y          N              Y           N                  N           N                 N              N
+
+Before Update      Y          Y              Y           N                  Y           N                 Y              N
+
+After Update       Y           N             Y           N                  Y           N                  Y              N 
+
+Before Delete      N           N             N           N                  Y           N                  Y              N 
+
+After Delete       N           N             N           N                  Y           N                  Y               N 
+
+After unDelete     Y           N             Y           N                  N           N                  N              N 
+
+
+
+
+Trigger.Map - It is always read only
+Trigger.old - It is always read only
+In Before insert, before update we can perform the write operation
+In Before insert only trigger.new is available
+In after insert Trigger.New, Trigger.NewMap is available
+In Before,after delete trigger.old,trigger.oldMap is available
+In Before,after undelete trigger.New,trigger.NewMap is available
+
+
+
+
+
+
+
+
+
+	
+	
+	

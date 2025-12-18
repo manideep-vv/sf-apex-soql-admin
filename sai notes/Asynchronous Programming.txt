@@ -1,0 +1,1306 @@
+Asynchronous Programming:
+=========================
+Synchronous:
+	|
+	 --> Sequential
+
+Asynchronous:
+------------
+By using this feature, we can introduce the parallel processing. Where the user no need to wait to initiate the second request.
+
+User can keep on initiate the request from the client application. Salesforce server will collect the request and will get processed by placing inside the Apex Queue.
+
+i.e. When the Salesforce Server is busy / not available, the request will get reside inside the Queue, till the required resources available to process.
+
+By using Asynchronous Operations we can perform the below operations.
+
+	1. We can perform the Long-Running Operations.
+	
+	2. We can perform a Complex Transaction, which involves millions of records processing
+	
+	3. We can perform the Integration features, to connect to the Third Party Systems and synchronize the records.
+	
+We can implement the Asynchronous operations by using the features.	
+	
+	1. Batch Apex / Batch Programming
+	2. Schedule Apex / Schedule Programming
+	3. Flex Queues	
+	4. Future Methods	
+	5. Queueable Apex / Queueable Interface
+	
+Batch Programming:
+==================
+	|
+	 --> 1. We can perform the operations on the Millions of Records.
+	     2. We can process max. of 50 Million Records (i.e. 5 Crore)
+		 3. We can invoke the Callouts also.
+		 4. We can perform the Long-Running Operations.
+		 5. These are always executing outside of th organization. (i.e. Running in the Background)
+		 
+		 Database.getQueryLocator(<SOQL>): ---> 50 Million Records
+
+
+		Database.Query() --> 50,000.
+
+
+	Interface: Database.Batchable
+							|
+							 --> 3 Methods
+							 
+									1. Start()
+									2. Execute()
+									3. Finish()
+									
+									Database.BatchableContext 
+													|
+													 --> GetJobID()
+
+		AsyncApexJob Object: Contains all the Batch Job Results.
+			Fields:
+				1. ID : Batch Job ID
+				2. Status : Status of Batch Job 
+							(Holding, Queued, Processing, Completed)
+				3. TotalJobItems : Number of Batches. --> 6
+				4. NumberOfErrors: Number of Failed Batches. --> 2
+				5. JobItemsProcessed : Number of Batches has been processed by Salesforce
+				6. CreatedBy.Email: Get the Batch Job Owner's Email ID.
+				
+		System.AbortJob('Batch Job ID');
+		
+Implementation Steps:
+=====================
+Step 1: Define a Global Class, which should be implemented by an interface
+		"Database.Batchable<SObject>".
+			
+	Syntax:
+		Global Class <ClassName> implements Database.Batchable<SObject>
+		{
+			// Write the Business Logic..
+		}
+		
+Step 2: Provide the Implementation for the Batchable Interface Methods.
+	Syntax:
+		Global Class <ClassName> implements Database.Batchable<SObject>
+		{
+			Global Database.QueryLocator Start(Database.BatchableContext bContext)
+			{
+				// Write the Business Logic..
+			}
+			
+			Global void Execute(Database.BatchableContext bContext, List<SObject> records)
+			{
+				// Write the Business Logic..
+			}
+			
+			Global void Finish(Database.BatchableContext bContext)
+			{
+				// Write the Business Logic..
+			}
+		}
+
+Step 3: Invoking the Batch Class.
+		
+		Syntax:
+			1. Create the Object of the Batch Class.
+				<BatchClassName> <objectName> = new <BatchClassName>();
+				
+			2. Invoke the Batch Class by using "Database.ExecuteBatch()" method.
+				
+				ID jobID = Database.ExecuteBatch(<BatchClassObjectName>);
+								
+								(OR)
+				
+				ID jobID = Database.ExecuteBatch(<BatchClassObjectName>, Integer Size);
+
+Step 4: Track the Status of the Batch Job by using below ways.
+
+		1. By using User Interface.
+		
+				Setup --> Monitor --> Jobs --> Apex Jobs.
+				
+		2. By using Programming with the help of "AsyncApexJob Object".
+				
+				AsyncApexJob jobDetails = [Select id, status, TotalJobItems,
+											JobItemsProcessed, NumberOfErrors, CreatedBy.Email
+												from AsyncApexJob
+													Where id =: <BatchJobID> ];
+Ways to Invoke the Batch Class:
+-------------------------------
+	1. By using Execute Anonymous Window.
+	2. By using Visualforce Pages.
+	3. By using Schedule Programming
+	4. By using Another Batch Class.
+
+Note
+-------
+1.With the Apex flex queue, you can submit up to 100 batch jobs.
+2.If the Apex flex queue has the maximum number of 100 jobs, Database.executeBatch throws a LimitException and doesn’t add the job to the queue
+3. Reordering Jobs in the Apex Flex Queue
+
+    Boolean isSuccess = System.FlexQueue.moveBeforeJob(jobToMoveId, jobInQueueId);
+
+4. You can use the System.scheduleBatch method to schedule a batch job to run once at a future time.
+
+ String cronID = System.scheduleBatch(reassign, 'job example', 1);
+
+example-2
+How to schedule a batch job after 20 min instantly (only once
+
+String cronID = System.scheduleBatch(batchApex, 'job example', 20,1000);
+
+batchApex - is the Refrence of the batch apex class
+
+'job example' - is the batch job name
+
+20 - how many minutes from now
+
+1000 - size of the batch
+
+
+Using Callouts in Batch Apex
+------------------------------------------
+To use a callout in batch Apex, specify Database.AllowsCallouts in the class definition. For example:
+public class SearchAndReplace implements Database.Batchable<sObject>, 
+   Database.AllowsCallouts{
+}
+											
+UseCase:
+========
+	Create a Batch Class, to Update the Hiring Manager Location and Contact Number for all the Hiring Manager Records, by dividing them into the various batches of size 10. And send the Batch Job Results to the Owner through an Email Notification.
+	
+Batch Class Code:
+-----------------
+
+
+global class BatchExample1 implements Database.Batchable<sobject>
+{
+    global Database.QueryLocator start(Database.BatchableContext bc){
+        String queryString='select Id,Name,Description from Account';
+       return Database.getQueryLocator(queryString);
+    }   
+    global void execute(Database.BatchableContext bc,List<Account> accounts)
+    {
+        for(Account acc:accounts){
+            acc.Description='This is description value';
+        }
+        update accounts;
+    }
+    global void finish(Database.BatchableContext bc){
+      AsyncApexJob async=[SELECT Id, JobType, ApexClassId, Status, TotalJobItems, NumberOfErrors FROM AsyncApexJob where Id=:bc.getJobId()];
+        system.debug('async='+async);
+    }
+}
+
+Execute anynomous window
+-------------------------------------------
+BatchExample1 bc=new BatchExample1();
+Id jobId=Database.executeBatch(bc);
+system.debug('jobId='+jobId);
+
+
+Example -2
+----------------------
+global class BatchExample1 implements Database.Batchable<sobject>
+{
+    global String queryString;
+    global String fieldName;
+     global   String value;
+    global BatchExample1(String queryString,String fieldName,String value){
+        this.queryString=queryString;
+        this.fieldName=fieldName;
+        this.value=value;
+    }
+    global Database.QueryLocator start(Database.BatchableContext bc){
+        return Database.getQueryLocator(queryString);
+    }   
+    global void execute(Database.BatchableContext bc,List<sobject> scopes)
+    {
+        for(sobject opty:scopes){
+            opty.put(fieldName,value);
+        }
+        update scopes;
+    }
+    global void finish(Database.BatchableContext bc){
+      AsyncApexJob async=[SELECT Id, JobType, ApexClassId, Status, TotalJobItems, NumberOfErrors FROM AsyncApexJob where Id=:bc.getJobId()];
+        system.debug('async='+async); 
+        system.debug('async='+async.Id);
+        Messaging.SingleEmailMessage msg=new Messaging.SingleEmailMessage();
+        String[] toAddress=new String[]{'prakashsaivenkat@gmail.com'};
+            msg.setToAddresses(toAddress);
+        msg.setSubject('Batch Job Status');
+        String body='Job Id: '+bc.getJobId()+'\n\n';
+        body=body+'Status : <b>'+async.Status+'</b> \n\n';        
+        body=body+'Thanks, \n <h1>Salesforce</h1>';
+        msg.setHtmlBody(body);
+        Messaging.Email[] emails=new  Messaging.Email[]{msg};
+        Messaging.sendEmail(emails);
+    }
+}
+
+Execute anynomous window
+-------------------------------------------
+String queryString='select Id,Type from Opportunity';
+BatchExample1 bc=new BatchExample1(queryString,'Type','New Customer');
+Id jobId=Database.executeBatch(bc,5);
+system.debug('jobId='+jobId);
+
+
+
+@isTest
+private class BatchTest1 {
+    
+    
+    @isTest static void myTest() {
+        opportunity opp=new opportunity(Name='Test op1',CloseDate=System.today()+10,StageName='Close Date');
+        insert opp;
+        Test.startTest();
+        BatchExample_2 bc=new BatchExample_2();
+        Database.executeBatch(bc);
+        Test.stopTest();
+    }
+
+}
+ 
+Global class HiringManagerUpdateBatch implements Database.Batchable<SObject>
+{
+	Global Database.QueryLocator Start(Database.BatchableContext bContext)
+    {
+        string hrRecordsQuery = 'Select id, name, location__C, contact_number__C, email_id__C from Hiring_Manager__C';
+        return Database.getQueryLocator(hrRecordsQuery);
+    }
+    
+    Global void Execute(Database.BatchableContext bContext, List<SObject> recordsToProcess)
+    {
+        if(! recordsToProcess.isEmpty())
+        {
+            List<Hiring_Manager__C> hrRecordsToUpdate = new List<Hiring_Manager__C>();
+            
+            for(SObject obj : recordsToProcess)
+            {
+                Hiring_Manager__C hrRecord = (Hiring_Manager__C) obj;
+                
+                	hrRecord.Location__c = 'Hyderabad';
+                	hrRecord.Contact_Number__c = '5555888899';
+                
+                hrRecordsToUpdate.Add(hrRecord);
+            }
+            
+            if(! hrRecordsToUpdate.isEmpty())
+            {
+                Update hrRecordsToUpdate;
+            }
+        }
+    }
+    
+    Global void Finish(Database.BatchableContext bContext)
+    {
+        System.debug('Batch Job Id is....: '+ bContext.getJobId());
+        
+        AsyncApexJob jobDetails = [Select id, status, totaljobItems, jobitemsprocessed, 
+                                  			numberoferrors, createdby.email
+                                  					from AsyncApexJob
+                                  							Where id =: bContext.getJobId()];
+        
+		MessagingUtilityHelper.SendBatchJobStatusNotifications(jobDetails,'HiringManagerUpdateBatch');        
+    }
+}
+
+MessagingUtilityHelper Class:
+-----------------------------
+public class MessagingUtilityHelper 
+{
+	Public static void SendBatchJobStatusNotifications(AsyncApexJob jobInfo, string jobName)
+    {
+        if(jobInfo != null)
+        {
+            Messaging.SingleEmailMessage email = new Messaging.SingleEmailMessage();
+            	
+            	string[] toAddress = new string[]{jobInfo.CreatedBy.Email, 'yamini.segu@gmail.com','msoni.janghel@gmail.com'};
+            	email.setToAddresses(toAddress);
+            
+            	email.setReplyTo('customersupport@dell.com');
+            
+            	email.setSenderDisplayName('DELL Weekly Batch Job Support Team');
+            
+            	string emailSubject = 'Alert : Hiring Manager Weekly Batch Job Status Notification: '+ jobName + ' - ( '+ jobInfo.Id+ ' )';
+            	email.setSubject(emailSubject);
+            
+            	string emailContent = 'Dear Customer Support, <br/><br/> We are pleased to inform you that we have executed the Weekly Hiring Manager Update Batch Job. <br/><br/>'+
+                    					'Please find below the Batch Job Status Details....: <br/><br/>'+
+                    					'Batch Job Id .......: ' + jobInfo.Id+
+                    					'<br/> Batch Job Name ......: '+ jobName+
+                    					'<br/> Batch Job Status .......: '+ jobInfo.Status+
+                    					'<br/> Total Number of Batches ......: '+ jobInfo.TotalJobItems+
+                    					'<br/> Number of Batvhes Processed .....: '+ jobInfo.JobItemsProcessed+
+                    					'<br/> Number of Batches Failed.........: '+ jobInfo.NumberOfErrors+
+                    					'<br/><br/> Please find the below address, if any queries. '+
+                    					'<br/><br/> <i> *** This is a System Generated Email. Please Do Not Reply.</i>'+
+                    					'<br/><br/> Thanks & Reagrds, <br/> Customer Support Team, <br/> Dell Inc. ';
+                email.setHtmlBody(emailContent);
+            
+            	Messaging.SendEmailResult[] results = Messaging.sendEmail(new Messaging.SingleEmailMessage[]{email});
+        }
+    }
+}
+
+Execution:
+----------
+// Invoking the Batch Class..
+	HiringManagerUpdateBatch hrBatch = new HiringManagerUpdateBatch();
+
+// Invoke by using Database.ExecuteBatch().
+	Database.executeBatch(hrBatch, 10);	
+	
+Assignment:
+===========
+	Create a Batch Job to Synchronize the Account Record's Billing Address information into the associated Contact Record's Mailing Address by dividing the Account Records to the various batches of size "4".
+
+
+	
+(Database.Stateful)
+----------------------------
+If you specify Database.Stateful in the class definition, you can maintain state across these transactions.
+When using Database.Stateful, only instance member variables retain their values between transactions. Static member variables don’t retain their values and are reset between transactions
+									
+State Management: (Database.Stateful)
+=================
+UseCase:
+========
+	Create a Batch Class, to Calculate the Total Annual Revenue of all the Account Records in the object, by dividing them to the various batches of size 4.
+	
+
+Map<userId,List<Account>>
+Batch Class:
+------------
+Global class CalculateTotalAnnualRevenueBatch implements Database.Batchable<SObject>, Database.Stateful
+{
+    Global Decimal totalAnnualRevenue = 0.0;
+    
+	Global Database.QueryLocator Start(Database.BatchableContext bContext)
+    {
+        string accountsQuery = 'Select id, name, annualrevenue from Account where annualrevenue != null';
+        return Database.getQueryLocator(accountsQuery);
+    }
+    
+    Global void Execute(Database.BatchableContext bContext, List<SObject> accountsToProcess)
+    {
+        if(! accountsToProcess.isEmpty())
+        {
+            for(SObject obj : accountsToProcess)
+            {
+                Account acc = (Account) obj;
+                
+                totalAnnualRevenue += acc.AnnualRevenue;
+            }
+        }
+    }
+    
+    Global void Finish(Database.BatchableContext bContext)
+    {
+        system.debug('Batch Job Id is.....: '+ bContext.getJobId());
+        
+		AsyncApexJob jobDetails = [Select id, status, totaljobItems, jobItemsProcessed, 
+                                  			NumberOfErrors, CreatedBy.Email
+                                  				from AsyncApexJob
+                                  						Where id =: bContext.getJobId() ];        
+        
+        MessagingUtilityHelper.SendTotalRevenueJobStatusNotification(jobDetails, 'CalculateTotalAnnualRevenueBatch', totalAnnualRevenue);
+    }
+}
+
+MessagingUtilityHelper Class:
+-----------------------------
+public class MessagingUtilityHelper 
+{
+    Public static void SendTotalRevenueJobStatusNotification(AsyncApexJob jobInfo, string jobName, Decimal revenueAmount)
+    {
+        if(jobInfo != null)
+        {
+            Messaging.SingleEmailMessage email = new Messaging.SingleEmailMessage();
+            	
+            	string[] toAddress = new string[]{jobInfo.CreatedBy.Email, 'yamini.segu@gmail.com','msoni.janghel@gmail.com'};
+            	email.setToAddresses(toAddress);
+            
+            	email.setReplyTo('customersupport@dell.com');
+            
+            	email.setSenderDisplayName('DELL Weekly Batch Job Support Team');
+            
+            	string emailSubject = 'Alert : Customers Total Annual Revenue Batch Job Status Notification: '+ jobName + ' - ( '+ jobInfo.Id+ ' )';
+            	email.setSubject(emailSubject);
+            
+            	string emailContent = 'Dear Customer Support, <br/><br/> We are pleased to inform you that we have executed the Customers Total Annual Revenue Calculation Batch Job. <br/><br/>'+
+                    					'Please find below the Batch Job Status Details....: <br/><br/>'+
+                    					'Batch Job Id .......: ' + jobInfo.Id+
+                    					'<br/> Batch Job Name ......: '+ jobName+
+                    					'<br/> Batch Job Status .......: '+ jobInfo.Status+
+                    					'<br/> Total Number of Batches ......: '+ jobInfo.TotalJobItems+
+                    					'<br/> Number of Batvhes Processed .....: '+ jobInfo.JobItemsProcessed+
+                    					'<br/> Number of Batches Failed.........: '+ jobInfo.NumberOfErrors+
+                    					'<br/> Total Annual Revenue is..........: '+ revenueAmount+
+                    					'<br/><br/> Please find the below address, if any queries. '+
+                    					'<br/><br/> <i> *** This is a System Generated Email. Please Do Not Reply.</i>'+
+                    					'<br/><br/> Thanks & Reagrds, <br/> Customer Support Team, <br/> Dell Inc. ';
+                email.setHtmlBody(emailContent);
+            
+            	Messaging.SendEmailResult[] results = Messaging.sendEmail(new Messaging.SingleEmailMessage[]{email});
+        }
+    }
+}
+
+Execution:
+----------
+CalculateTotalAnnualRevenueBatch revenueBatch = new CalculateTotalAnnualRevenueBatch();
+Database.executeBatch(revenueBatch, 4);
+
+Example 2
+-------------------
+1. Send email to Accounts owners of their list of account names
+
+global class Batch_Example3 implements Database.Batchable<sobject>,Database.stateful { 
+    Map<Id,List<String>> accMap=new Map<Id,List<String>>();
+global  Database.QueryLocator start(Database.BatchableContext bc)
+ {
+     String queryString='SELECT OwnerId, Id, Name FROM Account';
+     return database.getQueryLocator(queryString);
+ }
+    global void execute(Database.BatchableContext bc,List<Account> accounts){
+        
+        for(Account acc:accounts){
+            
+            if(!accMap.containsKey(acc.OwnerId))
+            {
+                List<String> accNames=new List<String>();
+                accNames.add(acc.Name);
+                accMap.put(acc.OwnerId,accNames);
+            }
+            else
+            {
+                List<String> existingAccountnamesList=accMap.get(acc.OwnerId);
+                existingAccountnamesList.add(acc.Name);
+                accMap.put(acc.OwnerId,existingAccountnamesList);
+                
+            }
+        }
+       
+        
+    }
+    global void finish(Database.BatchableContext bc){
+      Messaging.SingleEmailMessage msg = new Messaging.SingleEmailMessage();
+       Map<Id,String> userMap=new Map<Id,String>();
+       List<User> userList=[SELECT Id, Username, LastName, FirstName, Name, Email FROM User where Id In:accMap.keySet()];
+        for(User us:userList) {
+            userMap.put(us.Id, us.Email);
+        }
+        system.debug('userMap='+userMap);
+          List<Messaging.Email> emails=new List<Messaging.Email>();
+        
+        for(Id userId:accMap.keySet()){
+            List<String> accountNames=accMap.get(userId);
+            String body='';
+            for(String accName:accountNames){
+                body=body+'<br/>'+accName;
+            }
+            msg.setSubject('Your Accounts');
+            msg.setHtmlBody(body);
+            String email=userMap.get(userId);
+            String[] toadd=new String[]{email};
+                system.debug('toadd='+toadd);
+            msg.setToAddresses(toadd);
+            emails.add(msg);
+        }
+        
+       Messaging.sendEmail(emails);
+        
+    }
+     
+}
+
+
+
+Flex Queue:
+===========
+
+	10  --> 10 Callouts.
+
+	Setup --> Monitor --> Jobs --> Apex Flex Queue.
+
+
+Batch Apex Governor Limits
+-------------------------------------
+Keep in mind the following governor limits for batch Apex.
+Up to 5 batch jobs can be queued or active concurrently.
+Up to 100 Holding batch jobs can be held in the Apex flex queue.
+In a running test, you can submit a maximum of 5 batch jobs
+A maximum of 50 million records can be returned in the Database.QueryLocator object.
+If more than 50 million records are returned, the batch job is immediately terminated and marked as Failed.
+If no size is specified with the optional scope parameter of Database.executeBatch, Salesforce chunks the records returned by the start method into batches of 200 records. 
+	
+Future Methods:
+===============
+Telpnone both
+
+
+U - 1(5 min)
+u - 2 (30 min)
+u - 3(2 min)
+
+
+100 lines
+
+
+1-49 normal execution 1- 2 milli sec
+50 to 60 th my 20sec
+61 to 100 1min sec
+
+
+
+@future()
+60-100 normal execution 1- 2 milli sec
+
+Example
+---------------
+If an operation is long running then we can run it as an independent operation
+These independent operations is defined in future method
+Future method is an asynchronous operation
+Future method should have @future annotation
+Return type of future method is void
+Future method will not accept sobjects as parameters
+Every future method must be static
+Future method wont return the jobId
+Normally in a transaction operations are running sequentially. but Asynchronous operations will run parallely
+use @future(callout=true) to call a webservice from future method
+
+
+public class Future_Example {
+    @future
+    public static void callme(){
+        system.debug('call me 1');
+        system.debug('call me 2');
+        system.debug('call me 3');
+    }
+    public static void show(){
+        system.debug('show 1');
+        system.debug('show 2');
+        system.debug('show 3');
+    }
+    public static void invoke(){
+        system.debug('invoke 1');
+        system.debug('invoke 2');
+        show();
+        system.debug('invoke 3');
+        system.debug('invoke 4');
+        callme();
+        system.debug('invoke 5');
+    }
+    
+    
+}
+Example-2
+----------------
+//Calling the post office API using future method
+
+Note - Add the Endpoint url in remote site settings
+
+public class Future_Example {
+    @future(callout=true)
+    public static void callme(){
+        Http htp=new Http();
+        HttpRequest req=new HttpRequest();
+        req.setEndpoint('http://www.postalpincode.in/api/postoffice/Ameerpet');
+        req.setMethod('GET');
+        HttpResponse res=htp.send(req);
+        system.debug('status code='+res.getStatusCode()+'status ='+res.getStatus());
+        String jsonBody=res.getBody();
+        Map<String, Object> results =(Map<String,Object>)json.deserializeUntyped(jsonBody);
+        List<object> postofficeList=(List<Object>)results.get('PostOffice');
+        system.debug('postofficeList='+postofficeList);
+        String obj=json.serialize(postofficeList[0]);
+        
+        MyOffice obj2=(MyOffice)json.deserialize(obj, MyOffice.class);
+        system.debug('PINCode='+obj2.PINCode);
+        
+        
+    }
+    //Wrapper Class
+    Public class MyOffice
+    {
+        Public String name;
+        Public Integer PINCode;
+    }    
+    
+}
+	
+	2. Objects: 
+			|
+			 --> 2 Types.
+			 
+					1. Setup Objects:
+						Setup objects are used to interact with the Salesforce Metadata for the Declarative Development.
+						
+						Ex:
+							User, Profile, BusinessProcess, CustomTab, Document, Group, FieldSet, RecordType, SearchLayout, ValidationRule, WorkflowRule,...etc.					
+					
+					2. Non-Setup Objects:
+						Remaining All Standard and Custom Objects are comes under "Non-Setup" objects.
+						
+						Ex:
+							Account, Contact, Lead, Opportunity,...etc. Hiring_Manager__C, Position__C, Customer__c, Branch__C, Loan__C,...etc.
+							
+			Note: 
+				When the User tries to perform the DML operations on both "Setup" and "Non-Setup" objects within a Transaction, Salesforce will raise an Exception "MIXED_DML_OPERATION" exception.
+				
+User Object --> Setup Object 
+	|
+	 --> De-Activate the User through Programming (UPDATE)
+	 
+Hiring Manager Object --> Non-Setup Object
+	|
+	 --> Create a Hiring Manager Record (INSERT)
+					
+Rules:
+======
+	1. Method should be pre-fixed with "@future()" annotation.
+	
+	2. Future Methods should be always defined with "Static" keyword.
+	
+	3. Future method doesn't return any value to the calling environment. So that Future
+		method return type should be always "void".
+
+	4. We can supply the parameters to the Future Method which should be of "Primitive
+		Type, Arrays Of Primitive, Collection of Primitive".
+		We can't Supply the SObject Type of parameters to the Future Methods.
+		
+	Ex:
+    @future()
+    Public static void CreateHRRecord(string customerName, String[] countryNames, List<String> lstNames)
+    {
+	}
+	
+		Sol1 : We can Supply the Record ID as the Parameter and We can Write the SOQL
+				Query inside the Method, to get the record details based on the record id.
+				(Note: We can use 200 SOQL Queries inside the Future Methods)
+				
+		Sol2 : We can use "Serialization" and "DeSerialization" methods.
+		
+	5. One Future Method cannot invoke an another Future Method. (Chaining Process Not Available)
+	
+	6. Doesn't Provide any Tracking Mechanism. 
+
+	
+UseCase:
+========
+	Create a Future Method, to Insert a Hiring Manager Record and to De-Activate a User Record.
+	
+Class Code:
+-----------
+
+callme1(), callme2() are in same transcation we are performing DML operations on both setup and non-setup objects we will get MIXED_DML Exception
+to overcome this use @future annotation
+
+public class Future_Example {
+    
+    public static void callme1(){
+         User userToDeActivate = [Select id, username, isActive
+                                      from User
+                                        Where username = 'awheeler523@apblue.com'
+                                          Limit 1];
+        
+        if(userToDeActivate.id != null)
+        {
+            userToDeActivate.IsActive = false;
+            
+            update userToDeActivate;
+        }
+        callme2();
+    }
+    
+    public static void callme2(){
+        Account rec=new Account(Name='Sai');
+        insert rec;
+    }
+}
+
+
+Overcome the MIXED_DML Exception using @future annotation
+----------------------------------------------------------------------------------
+public class Future_Example {
+    
+    public static void callme1(){
+         User userToDeActivate = [Select id, username, isActive
+                                      from User
+                                        Where username = 'awheeler523@apblue.com'
+                                          Limit 1];
+        
+        if(userToDeActivate.id != null)
+        {
+            userToDeActivate.IsActive = false;
+            
+            update userToDeActivate;
+        }
+        callme2();
+    }
+    @future
+    public static void callme2(){
+        Account rec=new Account(Name='Sai');
+        insert rec;
+    }
+}
+
+Example -2
+-------------------
+public class CommonHelper 
+{
+  Public static void DoDMLOperations()
+    {
+        // De-Activate the User Record.. (Setup Object)
+        User userToDeActivate = [Select id, username, isActive
+                                      from User
+                                        Where username = 'testing330@gmail.com'
+                                          Limit 1];
+        
+        if(userToDeActivate.id != null)
+        {
+            userToDeActivate.IsActive = false;
+            
+            update userToDeActivate;
+            
+            // Invoke the Method to Create HR Record..
+            CreateHRRecord();           
+        }
+    }
+    
+    @future()
+    Public static void CreateHRRecord()
+    {      
+         // Create a Hiring Manager Record.. (Non-Setup Object)
+        Hiring_Manager__C hrRecord = new Hiring_Manager__C();
+          
+          hrRecord.Name = 'Sudeep Kumar';
+          hrRecord.Location__c = 'Mumbai';
+          hrRecord.Contact_Number__c = '9988554411';
+          hrRecord.Email_ID__c = 'sudeep@gmail.com';
+        
+        insert hrRecord;
+    }
+}
+
+Execution:
+----------
+	CommonHelper.DoDMLOperations();
+	
+
+Queueable Apex / Queueable Interface:
+=====================================
+Drawbacks of Future Methods:
+	1. Future Method doesn't supports the SObject Type of Parameters.
+	
+	2. Future Methods doesn't supports the Chaining Process.
+		(i.e. One Future Method can't invoke the another Future Method)
+		
+	3. Future Methods Doesn't provides the Tracking Mechanism through programming. (Can't receive the job Id )
+	
+Queueable Interface: (System.Queueable)
+--------------------
+Step 1: We need to Create a Global Class, which should be implemented by the
+		"System.Queueable"  or Queueable interface.
+		
+	Syntax:
+		Global Class <ClassName> implements System.Queueable
+		{
+			// Write the Business Logic..
+		}
+		
+Step 2: We have to provide the implementation for the Interface Methods. (i.e. Execute())
+	
+	Syntax:
+		Global Class <ClassName> implements System.Queueable
+		{
+			Global void Execute(System.QueueableContext qContext)
+			{
+				// Write the Business Logic..
+			}
+		}
+		
+Step 3: Push the Queueable Class into the Apex Queue and Track the Result of the
+		Queueable Class by using "AsyncApexJob" object.
+		
+		Id jobId = System.EnqueueJob(new <QueueableClassName>());
+		
+		Track the Result:
+			AsyncApexJob jobDetails = [SOQL Query from AsyncApexJob
+											Where id =: jobId];
+
+UseCase:
+========
+	Configure the Queueable Jobs, to create the "Hiring Manager Record", and an Associated "Position Record" by using 2 Queueable interface classes.
+	
+		1. Implement the Chaining Process, to invoke the Queueable Classes.
+		2. Supply the SObject Type of Parameters to the Queueable Class.
+		3. Track the Result of each Queueable class by using AsyncApexJob object.											
+											
+HiringManager Queueable Class:
+------------------------------
+Global class HiringManagerQueueable implements System.Queueable
+{
+	Global void Execute(System.QueueableContext qContext)
+    {
+        // Write the Business Logic to Insert the Hiring Manager Record..
+        	Hiring_Manager__C hrRecord = new Hiring_Manager__C();
+        		hrRecord.Name = 'Praveen  Kumar';
+        		hrRecord.Location__c = 'Chennai';
+        		hrRecord.Contact_Number__c = '8899554433';
+        		hrRecord.Email_ID__c = 'praveen@gmail.com';
+        
+        	insert hrRecord;
+        	if(hrRecord.Id != null)
+            {
+                system.debug('Hiring Manager Record ID is...: '+ hrRecord.id);
+                
+                // Invoke the PositionQueueable class to Create the Related Position Record.
+                ID posJobId = System.enqueueJob(new PositionsQueueable(hrRecord));
+                
+            }        		
+    }
+}
+
+PositionQueueable Class:
+------------------------
+Global class PositionsQueueable implements System.Queueable
+{
+    /*
+     * 	1. Constructor Name should be always same as the Class Name.
+     *  2. Constructors are used to assign the default values for the class members.
+     *  3. Constructor should be always defined with "Public" access specifier.
+     *  4. Constructor doesn't have any return type even void.
+     *  5. Constructor can have one or more parameters.
+     */
+     
+    Hiring_Manager__C hrRecord;
+    
+    Public PositionsQueueable(Hiring_Manager__C hr)
+    {
+        hrRecord = hr;
+    }
+    
+	Global void Execute(System.QueueableContext qContext)
+    {
+     	// Write the Code to Create a Related Position Record..
+     		Position__C pos = new Position__C();
+        		
+        		pos.Name = 'Salesforce Marketing Cloud Consultant';
+        		pos.Location__c = hrRecord.Location__c;
+        		pos.Position_Status__c = 'New Position';
+        		pos.Number_of_Positions__c = 2;
+        		pos.Open_Date__c = system.today();
+        		pos.Milestone_Date__c = system.today().AddDays(30);
+        		pos.HR_Contact_Number__c = hrRecord.Contact_Number__c;
+        		pos.HR_Email_ID__c = hrRecord.Email_ID__c;
+        		pos.Minimum_Budget__c = 1400000;
+        		pos.Maximum_Budget__c = 1800000;
+        		pos.Passport_Required__c = true;
+        		pos.Travel_Required__c = true;
+        		pos.Position_Description__c = 'Required 2+ years of experience in Salesforce Marketing Cloud.';
+        		pos.Skills_Required__c = 'Required 2+ years experience in Email Studio, Journey Builder, Content Builder, Mobile Studio.';
+        		
+				// Make the Position To be Related to HR.
+				pos.HiringManager__c = hrRecord.Id;
+        
+        	insert pos;
+        	if(pos.Id != null)
+            {
+                system.debug('Position Record Inserted with id...: '+ pos.Id);
+            }
+    }
+}
+
+Execution:
+----------
+	// Invoke the HiringManagerQueueable Class..
+		ID hrJobID = System.enqueueJob(new HiringManagerQueueable());
+
+	// Track the Result..
+		AsyncApexJob jobDetails = [Select id, status, totaljobitems, jobitemsprocessed, numberoferrors,
+												Createdby.email
+													from AsyncApexJob
+															Where id =: hrJobId];
+		system.debug('Job ID is....: '+ jobDetails.id);
+		system.debug('Job Status is...: '+ jobDetails.Status);
+
+	2,50,000 Batches / Day.
+	
+Schedule Programming / Apex:
+============================
+	Interface : System.Schedulable Interface.
+
+Public Class AccountsHelper
+{
+	Public static void DeleteOldAccounts()
+	{
+		// Written Business Logic..
+		// To Delete the Old Records, which are older than 30 days.
+	}
+}
+
+Step 1: Create a Global Class, which should be implemented by an interface
+		"System.Schedulable".
+		
+	Syntax:
+		Global Class <ClassName> implements System.Schedulable
+		{
+			// Write the Business Logic..
+		}
+		
+Step 2: Provide the Implementation for the Interface Methods.
+
+	Syntax:
+		Global Class <ClassName> implements System.Schedulable
+		{
+			Global void Execute(System.SchedulableContext sContext)
+			{
+				// Write the Business Logic..
+				// Write the Code to invoke the Class.
+			}
+		}
+		
+Step 3: Schedule the Global Class as below.
+		
+		Setup --> Build --> Develop --> Apex Classes.
+			1. Click on "Schedule Apex" button.
+			2. Enter the Schedule Job Name.
+			3. Select the "Schedulable Class" by using "Lookup Icon".
+			4. Select the Frequency of Interval.
+				(Daily / Weekly / Monthly).
+			5. Select the Start Date and End Date for Scheduling.
+			6. Select the "Preferred Start Time" from the Picklist.
+			7. Click on "OK". button.
+
+
+CRON Expression: Time at which the operation should fire
+--------------------------
+
+Symbols
+-------------
+*        -- Every (Day,Month,week,Hour,...)
+?        -- Not Sure
+L       -- Last (Friday, monday,last working day)
+W      -- Nearest working day 
+/         --Multiple
+#        -- Number#Weekday
+Sun:1  Sat: 7
+SECS       MINS     HRS         DAY_MONTH       MONTH             DAY_WEEK      YEAR
+----------------------------------------------------------------------------------------------------------------------
+1. Every month on 10th  at 5:30 am should run
+
+ 0              30            5                  10                         *                             ?
+
+
+2. On last working day of every month at 8 pm should run schedule job
+
+0                0              20          LW                             *                              ?
+
+3. on Every friday of march, April run the job at 10:30 am
+
+0             30            10             ?                            3,4                                6
+
+4.Run the job on last working day of every month at 8:30 pm
+
+0           30              20                LW                      *                              ?
+4.Run the job on second friday of every month at 4:00 pm
+
+0           0                  16                 ?                     *                                2#6   
+
+5.Run the job on 15th of every month at 12:24:43pm
+
+43        24               12                   15                  *                                 ?
+
+
+
+
+			
+Step 4: Track / Monitor the Scheduling Jobs.
+		
+		Setup -->Monitor --> Jobs --> Schedule Apex.
+
+
+Batch Class:
+------------
+
+public class ScheduleExample_1 implements Schedulable {
+    public void execute(SchedulableContext sc){
+        List<Opportunity> opties=[select Id,Name,StageName,CloseDate from Opportunity];
+        for(Opportunity opty:opties){
+            if(opty.StageName=='Closed won'){
+                opty.CloseDate=system.today();
+            }
+        }
+        update opties;
+    }
+}
+
+Execute
+---------------
+ScheduleExample_1 sc=new ScheduleExample_1();
+String cronExp='0 0 19 *   * ?';
+Id jobId=system.schedule('My Test Schedule 3', cronExp, sc);
+system.abortJob('08e0o00003KNHTUAA5');
+
+			
+UseCase:
+========
+	Create a Schedule Job, To Purge All the Position Records, whose MileStone Date is Over. Schedule the Job to be get run on EveryDay morning @ 2.00 AM.
+	
+Step 1: Create a Formula Field in the Position Object To indicate which position records
+		to be get removed.
+			Field Name : Position Record Can Delete
+			Data Type: Formula.
+			Formula Return Type: CheckBox
+				Formula Condition: if(Today() > Milestone_Date__c, true, false)
+				
+Step 2: Create a Batch Job with the Required Implementation to Remove the Position
+		Records.
+		
+
+
+Global class PurgeClosedPositionsBatchJob implements Database.Batchable<SObject>
+{
+	Global Database.QueryLocator Start(Database.BatchableContext bContext)
+    {
+        string positionsQuery = 'Select id, name, Position_Record_Can_Delete__c from Position__C where Position_Record_Can_Delete__c = true';
+        return Database.getQueryLocator(positionsQuery);
+    }
+    
+    Global void Execute(Database.BatchableContext bContext, List<SObject> recordsToProcess)
+    {
+        if(! recordsToProcess.isEmpty())
+        {
+            List<Position__C> positionsToDelete = (List<Position__C>) recordsToProcess;
+            
+           	Database.DeleteResult[] results = Database.delete(positionsToDelete,false);
+        }
+    }
+    
+    Global void Finish(Database.BatchableContext bContext)
+    {
+        System.debug('Batch Job ID is....: '+ bContext.getJobId()); 
+        
+        AsyncApexJob jobDetails = [Select id, status, totaljobitems, jobitemsprocessed, numberoferrors,
+                                  		Createdby.email
+                                  				from AsyncApexJOb
+                                  						Where id =: bContext.getJobId()];
+        
+        System.debug('Batch Job Status....: '+ jobDetails.Status);
+        
+        MessagingUtilityHelper.SendBatchJobStatusNotifications(jobDetails, 'PurgeClosedPositionsBatchJob');
+    }
+}
+					
+MessagingUtilityHelper Class:
+-----------------------------
+public class MessagingUtilityHelper 
+{
+    Public static void SendTotalRevenueJobStatusNotification(AsyncApexJob jobInfo, string jobName, Decimal revenueAmount)
+    {
+        if(jobInfo != null)
+        {
+            Messaging.SingleEmailMessage email = new Messaging.SingleEmailMessage();
+            	
+            	string[] toAddress = new string[]{jobInfo.CreatedBy.Email};
+            	email.setToAddresses(toAddress);
+            
+            	email.setReplyTo('customersupport@dell.com');
+            
+            	email.setSenderDisplayName('DELL Weekly Batch Job Support Team');
+            
+            	string emailSubject = 'Alert : Customers Total Annual Revenue Batch Job Status Notification: '+ jobName + ' - ( '+ jobInfo.Id+ ' )';
+            	email.setSubject(emailSubject);
+            
+            	string emailContent = 'Dear Customer Support, <br/><br/> We are pleased to inform you that we have executed the Customers Total Annual Revenue Calculation Batch Job. <br/><br/>'+
+                    					'Please find below the Batch Job Status Details....: <br/><br/>'+
+                    					'Batch Job Id .......: ' + jobInfo.Id+
+                    					'<br/> Batch Job Name ......: '+ jobName+
+                    					'<br/> Batch Job Status .......: '+ jobInfo.Status+
+                    					'<br/> Total Number of Batches ......: '+ jobInfo.TotalJobItems+
+                    					'<br/> Number of Batvhes Processed .....: '+ jobInfo.JobItemsProcessed+
+                    					'<br/> Number of Batches Failed.........: '+ jobInfo.NumberOfErrors+
+                    					'<br/> Total Annual Revenue is..........: '+ revenueAmount+
+                    					'<br/><br/> Please find the below address, if any queries. '+
+                    					'<br/><br/> <i> *** This is a System Generated Email. Please Do Not Reply.</i>'+
+                    					'<br/><br/> Thanks & Reagrds, <br/> Customer Support Team, <br/> Dell Inc. ';
+                email.setHtmlBody(emailContent);
+            
+            	Messaging.SendEmailResult[] results = Messaging.sendEmail(new Messaging.SingleEmailMessage[]{email});
+        }
+    }
+}
+
+Step 3: Create a Schedulable Class, to Schedule the Batch Job.
+	
+Global class PurgeClosedPositionsScheduleJob implements System.Schedulable
+{
+	Global void Execute(System.SchedulableContext sContext)
+    {
+        // Write the Code to invoke the Batch Class..
+        PurgeClosedPositionsBatchJob pBatch= new PurgeClosedPositionsBatchJob();
+        
+        Database.executeBatch(pBatch, 5);
+    }
+}
+
+Step 4: Schedule the Class to Run on Every Day morning @ 2.00 AM.
+		
+	Setup --> Build --> Develop --> Apex Classes.
+			1. Click on "Schedule Apex" button.
+			2. Enter the Schedule Job Name. (Ex: Purge Closed Positions Schedule)
+			3. Select the "Schedulable Class" by using "Lookup Icon".
+				(Ex: PurgeClosedPositionsScheduleJob)
+			4. Select the Frequency of Interval.
+				(Daily / Weekly / Monthly). (Ex: Daily --> Mon - Sun)
+			5. Select the Start Date and End Date for Scheduling.
+			6. Select the "Preferred Start Time" from the Picklist. (Ex: 2.00 AM)
+			7. Click on "OK". button.
+	
+Step 4: Track / Monitor the Scheduling Jobs.
+		
+		Setup -->Monitor --> Jobs --> Schedule Jobs.	
+		
+	
+	
+public class ScheduleExample_1 implements Schedulable {
+    public void execute(SchedulableContext sc){
+        List<Opportunity> opties=[select Id,Name,StageName,CloseDate,Description from Opportunity];
+        for(Opportunity opty:opties){
+                opty.Description='Schedule job is ran';
+        }
+        update opties;
+    }
+}	
+Execute
+------------------------
+
+ScheduleExample_1 sc=new ScheduleExample_1();
+String cronExp='0 25 13 *   * ?';
+Id jobId=system.schedule('My Test Schedule 4', cronExp, sc);
+system.debug('jobId='+jobId);
+
+
+
+//Calling Batch class from scheule apex
+
+public class ScheduleExample_1 implements Schedulable {
+    public void execute(SchedulableContext sc){
+        Batch_Example3 bc=new Batch_Example3();
+        Database.executeBatch(bc); 
+    }
+}
+
+1. How to schedule a batch job after 20 min instantly
+
+system.scheduleBatch(param1,param2,param3,param4);
+
+param1 - Object of the batch apex
+param2 - Name of the job
+Param3- how many minutes from now
+Param4 - size of the batch
+
+Batch_Example3 bc=new Batch_Example3();
+system.scheduleBatch(bc,'My Batch da' ,20,10);
+
+1. how many jobs we can schedule at a time
+
+100
+
+2. Future          
+----------------------------
+1. No jobId
+2. only Primitive data types can be passed as parameter
+3. We cannot call from future to another future method
+
+
+Queueable apex
+------------------------
+1. Job id We will get
+2. Both Primitive and Non -Primitive data types can be passed as parameter
+3. we can call Queueable apex from another Queueable apex
+4.If your process depends on another process to run first  then use Queueable to call another Queueable  
+
+
+
+
+Calling Batch apex    - Id jobId=Database.executeBatch(batchJob,batchsize)
+                                         
+Calling batch job instantly or scheudule instantly
+                                 Batch_Example3 bc=new Batch_Example3();
+                                  system.scheduleBatch(bc,'My Batch da' ,20,10);
+
+
+Calling schedule apex - Id jobId=system.schedule('job Name', cronExp, schedulejob);
+
+Calling queueable apex - Id jobId=system.enqueueJob(qc);
+
+Calling future method   No job Id will return and call with className.futureMethodName()
+
+
+
+
+From Future
+
+Call       future       - NO
+Call Queueable      - NO
+Call Schedule        - NO
+Call Batch             - NO
+
+
+
+From Batch
+
+Call  future             - NO
+Call Queueable      - NO
+Call Schedule        - Yes (In Finish method)
+Call Batch             -Yes (In Finish method)
+
+
+From Queueable
+
+Call  future             -Yes
+Call Queueable      - Yes
+Call Schedule        - Yes 
+Call Batch             -Yes 
+
+
+From Schedule
+
+Call  future             -Yes
+Call Queueable      - Yes
+Call Schedule        - Yes 
+Call Batch             -Yes 
+
+
+
+
+
+		
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+				
+			
+
+
+
+
+
+
+
+

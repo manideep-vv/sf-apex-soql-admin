@@ -1,0 +1,171 @@
+// Get all leads created on 15th June 2020
+SELECT Name, Status, LeadSource, Company, Email, CreatedDate FROM Lead WHERE CreatedDate>2020-06-15T00:00:00.000+0000
+
+// Get all leads created today
+SELECT Name, Status, LeadSource, Company, Email, CreatedDate FROM Lead WHERE CreatedDate=TODAY
+
+// Get all leads created after yesterday
+SELECT Name, Status, LeadSource, Company, Email, CreatedDate FROM Lead WHERE CreatedDate>YESTERDAY
+
+// Get all leads created in last 10 days
+SELECT Name, Status, LeadSource, Company, Email, CreatedDate FROM Lead WHERE CreatedDate=LAST_N_DAYS:10
+
+
+SOQL DATE & DATETIME LITERALS - COMPLETE LIST
+always remember 3 variations (-1,0,1)- today, yesterday, tommorrow, thisYear, Previous year, next year 
+------------------------------------------
+1. BASIC DAY LITERALS
+------------------------------------------
+= TODAY 
+= YESTERDAY
+= TOMORROW
+
+Examples:
+WHERE CreatedDate = TODAY (here today means 12:00 AM to 11:59 PM)
+WHERE CreatedDate = YESTERDAY
+
+SELECT   ID, FirstName,BirthdatE,LastModifiedDate FROM Contact  where lastmodifieddate= TODAY
+SELECT   ID, FirstName,BirthdatE,LastModifiedDate FROM Contact  where lastmodifieddate > = YESTERDAY
+SELECT   ID, FirstName,BirthdatE,LastModifiedDate FROM Contact  where lastmodifieddate > YESTERdAY AND lastmodifieddate < tomorrow
+
+------------------------------------------
+2. WEEK LITERALS
+------------------------------------------
+= THIS_WEEK
+= LAST_WEEK
+= NEXT_WEEK
+
+------------------------------------------
+3. MONTH LITERALS
+------------------------------------------
+= THIS_MONTH
+= LAST_MONTH
+= NEXT_MONTH
+
+------------------------------------------
+4. QUARTER LITERALS
+------------------------------------------
+= THIS_QUARTER
+= LAST_QUARTER
+= NEXT_QUARTER
+
+------------------------------------------
+5. YEAR LITERALS
+------------------------------------------
+= THIS_YEAR
+= LAST_YEAR
+= NEXT_YEAR
+
+------------------------------------------
+6. ROLLING PERIOD LITERALS
+------------------------------------------
+= LAST_N_DAYS:n
+= NEXT_N_DAYS:n
+= N_DAYS_AGO:n
+= LAST_N_WEEKS:n
+= NEXT_N_WEEKS:n
+= LAST_N_MONTHS:n
+= NEXT_N_MONTHS:n
+= LAST_N_QUARTERS:n
+= NEXT_N_QUARTERS:n
+= LAST_N_YEARS:n
+= NEXT_N_YEARS:n
+
+Examples:
+WHERE CreatedDate = LAST_N_DAYS:30
+WHERE LastModifiedDate = NEXT_N_DAYS:10
+SELECT   ID, FirstName,BirthdatE,LastModifiedDate FROM Contact  where lastmodifieddate =LAST_N_DAYS:20
+
+------------------------------------------
+7. ADVANCED PERIODS
+------------------------------------------
+= LAST_90_DAYS
+= LAST_120_DAYS
+= LAST_365_DAYS
+
+WHERE CreatedDate = LAST_90_DAYS
+WHERE CreatedDate = LAST_120_DAYS
+WHERE CreatedDate = LAST_365_DAYS
+
+
+------------------------------------------
+8. FISCAL LITERALS
+------------------------------------------
+= THIS_FISCAL_YEAR
+= LAST_FISCAL_YEAR
+= NEXT_FISCAL_YEAR
+= THIS_FISCAL_QUARTER
+= LAST_FISCAL_QUARTER
+= NEXT_FISCAL_QUARTER
+= CURRENT_FY
+= CURRENT_FQ
+
+------------------------------------------
+9. DATE ONLY FORMAT ( DOB, Birthdate__c etc.)
+------------------------------------------
+YYYY-MM-DD
+
+Example:
+WHERE Birthdate__c = 2024-12-25
+
+------------------------------------------
+10. DATETIME EXACT FORMAT (ISO-8601)
+------------------------------------------
+YYYY-MM-DDThh:mm:ssZ
+
+Examples:
+WHERE CreatedDate >= 2024-12-25T10:30:00Z
+WHERE CreatedDate <= 2025-01-01T00:00:00Z
+
+------------------------------------------
+11. COMMON REAL-WORLD EXAMPLES
+------------------------------------------
+Get leads created today:
+SELECT Id FROM Lead WHERE CreatedDate = TODAY
+
+Records modified in last 7 days:
+SELECT Id FROM Account WHERE LastModifiedDate = LAST_N_DAYS:7
+SELECT   ID, FirstName,BirthdatE,LastModifiedDate,createdDAte  FROM Contact  where lastmodifiedDate=LAST_N_DAYS:7
+
+Opportunities closing this month:
+SELECT Id FROM Opportunity WHERE CloseDate = THIS_MONTH
+SELECT   ID, FirstName,BirthdatE,LastModifiedDate,createdDAte  FROM Contact  where lastmodifiedDate=THIS_MONTH
+
+
+Events in next 7 days:
+SELECT Id FROM Event WHERE ActivityDateTime = NEXT_N_DAYS:7
+
+------------------------------------------
+END OF REFERENCE FILE
+
+
+
+Date functions
+https://developer.salesforce.com/docs/atlas.en-us.soql_sosl.meta/soql_sosl/sforce_api_calls_soql_select_date_functions.htm
+
+FROM DATETIME datatype we can extract the  year,month,day, date in a month,  week num , weekday name 
+
+TODAY() - gives today date and time
+CALENDAR_MONTH(dateTime)	 - 1 for jan , 12- for dec ,returns num repreenting calendar month of date fields
+CALENDAR_YEAR(dateTime)	      -2009
+
+DAY_IN_WEEK(dateTime)	 1 for Sunday , 7 for Saturday
+DAY_IN_MONTH(dateTime)	20 for February 20
+DAY_IN_YEAR(dateTime)	32 for February 1
+
+HOUR_IN_DAY()	18 for a time of 18:23:10
+WEEK_IN_MONTH()	2 for April 10
+WEEK_IN_YEAR()	1 for January 3
+
+
+SELECT   ID, FirstName,BirthdatE,LastModifiedDate FROM Contact  where DAY_IN_WEEK(birthDate)=2
+SELECT   ID, FirstName,BirthdatE,LastModifiedDate FROM Contact  where CALENDAR_YEAR(birthDate)=1952
+
+//gives records greater than 2020
+SELECT   ID, FirstName,BirthdatE,LastModifiedDate  FROM Contact  where CALENDAR_YEAR(birthDate)>2020
+
+note- CALENDAR_YEAR(TODAY()) - 1   <-- subtraction is NOT allowed inside SOQL
+----------WRONG (not allowed)--------
+WHERE CALENDAR_YEAR(Birthdate) = CALENDAR_YEAR(TODAY()) - 1
+Salesforce does NOT allow subtraction inside SOQL.
+Use LAST_YEAR literal (works only for DateTime, NOT DATE)

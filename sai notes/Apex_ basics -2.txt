@@ -1,0 +1,630 @@
+1. Access Modifiers
+----------------------------
+Apex allows you to use the private, protected, public, and global access modifiers
+ when defining methods and variables.
+
+
+
+private
+-----------------
+This is the default, and means that the method or variable is accessible only within the Apex class in which it is defined. 
+If you do not specify an access modifier, the method or variable is private.
+
+
+public class Example3 {
+  private Integer i=1;
+    private void test1(){
+        system.debug('i='+i);
+    }
+    public void test2()
+    {
+        test1();
+    }
+}
+
+
+public class AddtionClass {
+  public integer a=1;
+    public void testMethodAdd(){
+        Integer b=2;
+        Integer  c=a+b;
+        system.debug('c value='+c);
+        
+    }   
+    public void accessingPrivateMembers(){
+        Example3 ex=new Example3();
+        //system.debug('i value='+ex.i);
+        ex.test2();
+        
+    }   
+}
+
+Debug---> Execute anonynomous Window ------->
+----------------------------------------------------
+
+AddtionClass addClass=new AddtionClass();
+addClass.accessingPrivateMembers();
+
+
+
+protected
+-------------------------
+This means that the method or variable is visible to any inner classes in the defining Apex class, 
+and to the classes that extend the defining Apex class. You can only use this access modifier for 
+instance methods and member variables. Note that it is strictly more permissive than the default (private) setting, just like Java.
+
+public virtual class Bike {
+    Protected virtual Integer gears(){
+        return 4;
+    }
+    Protected virtual void ride()
+    {
+        system.debug('In normal bike');
+    }
+}
+
+
+public class HeroBike extends Bike{
+
+    public override  void ride(){
+        system.debug('In hero ride');
+    }
+     public override  Integer gears(){
+        return 5;
+    }    
+}
+
+
+Debug---> Execute anonynomous Window ------->
+----------------------------------------------
+HeroBike bk=new HeroBike();
+bk.ride();
+Integer numberofGears=bk.gears();
+system.debug('numberofGears='+numberofGears);
+
+output
+-------------
+In hero ride
+numberofGears=5
+
+public
+-------------------------
+This means the method or variable can be used by any Apex in this application or namespace.
+
+public class AddtionClass {
+  public integer a=1;
+    public void testMethodAdd(){
+        Integer b=2;
+        Integer  c=a+b;
+        system.debug('c value='+c);
+        
+    }    
+}
+
+
+
+public class AccessPublicClass {
+    public static void accessAdditionClass(){
+        AddtionClass acc=new AddtionClass();
+        acc.testMethodAdd();
+        
+    }
+}
+
+
+
+Calling a static method
+Syntax
+--------------
+ClassName.MethodName();
+
+Example
+-------------
+AccessPublicClass.accessAdditionClass();    
+
+Calling Non - Static method
+-----------------------------
+ClassName refrence=new  ClassName();
+
+Example
+-------------
+AddtionClass ref=new AddtionClass();
+//Accessing a method
+ref.testMethodAdd();
+//Accessing a variable
+system.debug('a='+ref.a);
+
+
+
+
+
+global
+--------------------
+This means the method or variable can be used by any Apex code that has access to the class, not just the Apex code in the
+ same application. This access modifier should be used for any method that needs to be referenced outside of the
+ application, either in the SOAP API or by other Apex code. If you declare a method or variable as global,
+ you must also declare the class that contains it as global.
+
+
+2.Creation of multiple objects for an apex class
+--------------------------------------------------
+
+public class Employee {
+    public String FullName;
+    public Integer myage;
+    public Boolean isEmpGood;
+
+    //Default Constructor
+    public Employee(){
+        
+    }
+
+    //parameterized constructor
+    public Employee(String name,Integer age,Boolean isGood){
+        FullName=name;
+        myage=age;
+        isEmpGood=isGood;
+        
+    }
+    public void getDetails(){  
+        system.debug('FullName='+FullName+'myage='+myage+'Good= '+isEmpGood);
+    }
+    
+}
+
+Debug---> Execute anonynomous Window ------->
+----------------------------------------------
+
+Way-1
+-------
+Employee emp1=new Employee('Sai',23,true);
+emp1.getDetails();
+Employee emp2=new Employee('Nas',22,false);
+emp2.getDetails();
+Employee emp3=new Employee('raj',24,true);
+emp3.getDetails();
+
+Way-2
+---------
+Employee emp1, emp2, emp3;
+emp1=new Employee('Sai',23,true);
+emp1.getDetails();
+emp2=new Employee('Nas',22,false);
+emp2.getDetails();
+emp3=new Employee('raj',24,true);
+emp3.getDetails();
+
+
+
+3.Instance variables and Local variables
+------------------------------------------
+Instance variables
+-------------------
+A varible is declared inside a class and outside a method    
+   
+Local variables
+-------------------
+A variable is declared inside a method
+
+
+
+public class AccessPublicClass {
+    public integer i=1; //Instance variable
+    public void method1(){
+        Integer k=2; //Local variable
+        system.debug('Local variable='+k+'Instance Variable='+i);
+    }
+    public void method2(){
+        Integer j=3; //Local variable
+        system.debug('Local variable='+j+'Instance Variable='+i);
+    }
+    
+}
+
+Debug---> Execute anonynomous Window ------->
+----------------------------------------------
+
+AccessPublicClass accpub=new AccessPublicClass();
+
+accpub.method1();
+accpub.method2();
+
+
+
+
+
+3. Static and Instance Methods, Variables, and Initialization Code
+----------------------------------------------------------------
+
+Static methods, variables, and initialization code have these characteristics.
+
+They’re associated with a class.
+They’re allowed only in outer classes.
+They’re initialized only when a class is loaded.
+
+static variable
+----------------------
+
+A static variable is static only within the scope of the Apex transaction. 
+The value of a static variable persists within the context of a single transaction and is reset across transaction boundaries. 
+if an Apex DML request causes a trigger to fire multiple times, the static variables persist across these trigger invocations.
+
+A static method is used as a utility method, and it never depends on the value of an instance member variable. 
+Because a static method is only associated with a class, it can’t access the instance member variable values of its class.
+
+If you don’t want to write your own constructor for a class, you can use an instance initialization code block to initialize instance variables
+A static initialization block runs only once, regardless of how many times you access the class that contains it.
+
+
+
+public class AccessPublicClass {
+    public static integer i=1; //Static variable
+    public static void method1(){ //Static Method
+        Integer k=2; //Local variable
+        system.debug('Local variable='+k+'Static Variable='+i);
+    }
+    public void method2(){ //Non Static Method
+        Integer j=3; //Local variable
+        system.debug('Local variable='+j+'Static Variable='+i);
+    }
+    
+}
+
+
+
+Debug---> Execute anonynomous Window ------->
+----------------------------------------------
+
+
+//Accessing Static variable
+system.debug('i value='+AccessPublicClass.i);
+//Accessing Static method
+AccessPublicClass.method1();
+
+//Accessing Non- Static method    
+AccessPublicClass accpub=new AccessPublicClass();
+ 
+accpub.method2();
+
+
+
+4. Apex Properties
+--------------------
+An Apex property is similar to a variable; however, you can do additional things in your code to a property value before
+it is accessed or returned. 
+
+Property definitions include one or two code blocks, representing a get accessor and a set accessor:
+The code in a get accessor executes when the property is read.
+The code in a set accessor executes when the property is assigned a new value.
+
+
+The body of the get accessor is similar to that of a method. It must return a value of the property type. 
+Executing the get accessor is the same as reading the value of the variable.
+
+
+When you assign a value to the property, the set accessor is invoked with an argument that provides the new value.
+Syntax
+--------------------------
+Public class BasicClass {
+
+   // Property declaration
+   access_modifier return_type property_name {
+      get {
+         //Get accessor code block
+      }
+      set {
+         //Set accessor code block
+      }
+   } 
+}
+
+
+public class BasicProperty {
+    public Integer numberofItems{
+        get{return numberofItems; }
+        set{ numberofItems=value; }
+    }
+}
+
+Debug---> Execute anonynomous Window ------->
+----------------------------------------------
+
+BasicProperty bp = new BasicProperty();
+bp.numberofItems=10; // Calls set accessor
+system.debug('bp.numberofItems='+bp.numberofItems); //Calls get accessor
+
+
+Automatic Properties
+--------------------
+Properties do not require additional code in their get or set accessor code blocks. 
+Instead, you can leave get and set accessor code blocks empty to define an automatic property
+
+public class AutomaticProperty {
+   public integer MyReadOnlyProp { get; }
+   public double MyReadWriteProp { get; set; }
+   public string MyWriteOnlyProp { set; }
+}
+
+Debug---> Execute anonynomous Window ------->
+----------------------------------------------
+
+AutomaticProperty ap = new AutomaticProperty();
+ap.MyReadOnlyProp = 5;                 // This produces a compile error: not writable
+ap.MyReadWriteProp = 5;                // No error
+System.assertEquals(5, ap.MyWriteOnlyProp);   // This produces a compile error: not readable
+
+
+
+5. Interfaces
+------------------------
+An interface is like a class in which none of the methods have been implemented—the method 
+signatures are there, but the body of each method is empty. To use an interface, another class
+must implement it by providing a body for all of the methods contained in the interface.
+
+public interface PurchaseOrder {
+ Double Discount();
+}
+
+
+public class CustomerPurchaseOrder implements PurchaseOrder{
+    
+    public Double Discount(){
+        return 0.5;
+    }
+    public String greeting(Boolean isHappyCustomer){
+        String message;
+        if(isHappyCustomer==true){
+            message='Customer is Happy';
+        }else
+        {
+            message='Customer is un Happy';
+        }
+        return message;
+    }
+}
+
+public class EmployeePurchaseOrder implements PurchaseOrder{
+
+    public Double Discount(){
+        return 0.10;
+    }
+}
+
+Debug---> Execute anonynomous Window ------->
+----------------------------------------------
+
+EmployeePurchaseOrder emp1=new EmployeePurchaseOrder();
+Double discountPercentage=emp1.Discount();
+system.debug('discountPercentage='+discountPercentage);
+
+CustomerPurchaseOrder emp2=new CustomerPurchaseOrder();
+Double discountPercentage=emp2.Discount();
+system.debug('discountPercentage='+discountPercentage);
+system.debug('discountPercentage='+emp2.greeting(true));
+
+
+//Interface holding the child class reference 
+PurchaseOrder emp3=new EmployeePurchaseOrder();
+system.debug('discountPercentage='+emp3.Discount());
+
+
+
+6. final Keyword
+------------------------------
+Final variables can only be assigned a value once, either when you declare a variable 
+or inside a constructor. You must assign a value to it in one of these two places.
+
+To define a constant, mark a variable as both static and final.
+
+
+public class BasicProperty {
+    public static final integer i=10;
+    public static void test1(){
+        system.debug('i value='+i);
+        i=20; // Final members can only be assigned in their declaration, init blocks, or constructors: i
+    }
+}
+
+
+Debug---> Execute anonynomous Window ------->
+----------------------------------------------
+
+BasicProperty.test1();
+
+
+
+
+7. instanceof Keyword
+--------------------
+If you need to verify at run time whether an object is actually an instance of a particular class,
+use the instanceof keyword.
+
+
+Debug---> Execute anonynomous Window ------->
+----------------------------------------------
+
+Account acc=new Account(Name='sai');
+Sobject obj=acc;
+Boolean isInstanceofAccount=obj instanceof Account;
+system.debug('isInstanceofAccount='+isInstanceofAccount);
+Boolean isInstanceofContact=obj instanceof Contact;
+system.debug('isInstanceofContact='+isInstanceofContact);
+
+
+
+8.This keyword
+-----------------
+
+This keyword used to represent the current instance of the class.
+We use This keyword to differentiate between class instance
+variable and local variable.
+
+
+
+public class ThisKeyWordExample
+{
+    String str  = 'Test Me';
+   
+    public void strMethod(String str)
+    {
+        System.debug('--Parameter Value--'+str);
+        System.debug('--Current Instance Value--'+this.str);
+    }
+   
+}
+
+Debug---> Execute anonynomous Window ------->
+----------------------------------------------
+ThisKeyWordExample ref=new ThisKeyWordExample();
+ref.strMethod('Hello');
+
+str = Refers parameter value.
+this.str = Refers the current instance variable value.
+
+
+
+9. super keyword
+-----------------
+public virtual class Bike {
+    
+    
+    Protected virtual void ride()
+    {
+        system.debug('In normal bike');
+    }
+}
+
+
+public class HeroBike extends Bike{
+
+    public override  void ride(){
+        super.ride();
+        system.debug('In hero ride');
+    }
+       
+}
+
+
+Debug---> Execute anonynomous Window ------->
+----------------------------------------------
+HeroBike bk=new HeroBike();
+bk.ride();
+
+
+
+10. with sharing, without sharing, and inherited sharing Keywords
+--------------------------------------------------------------------------------------------
+with sharing
+---------------
+The with sharing keyword allows you to specify that the sharing rules for the current user 
+are considered for the class. You have to explicitly set this keyword for the class because 
+Apex code runs in system context. In system context, Apex code has access to all objects and
+ fields— object permissions, field-level security, sharing rules aren’t applied for the current user.
+
+
+public with sharing class sharingClass {
+
+// Code here
+
+}
+
+
+
+Without Sharing
+---------------
+Use the without sharing keywords when declaring a class to 
+ensure that the sharing rules for the current user are not enforced.
+ For example, you can explicitly turn off sharing rule enforcement
+ when a class is called from another class that is declared using with sharing.
+
+
+
+
+public without sharing class noSharing {
+
+// Code here
+
+}
+
+inherited sharing
+------------------
+If you specify inherited sharing Keyword on an Apex class,  which allows the class to run in the sharing mode of 
+the class that called it. Using inherited sharing enables you to pass security review and ensure that your privileged 
+Apex code is not used in unexpected or insecure ways.
+
+An Apex class with inherited sharing runs as with sharing when used as a Visualforce page controller, 
+Apex REST service, or an entry point to an Apex transaction.
+
+An Apex class with Inherited Sharing is being called from some other class which is having without sharing setting, 
+then it will run in without sharing mode.
+
+Example
+--------------
+This example declares an Apex class with inherited sharing and a Visualforce invocation of that Apex code.
+ Because of the inherited sharing declaration, only opportunities for which the running user has sharing access 
+are displayed. If the declaration is omitted, even opportunities that the user has no rights to view are 
+displayed due to the insecure default behavior of omitting the declaration.
+
+Apex Class
+-----------------
+public inherited sharing class OpportunityMethods {
+    public list<Opportunity> getAllTheOpps(){
+        return [SELECT Id, Name, StageName FROM Opportunity];
+    }
+}
+Visualforce page
+----------------------------
+<apex:page controller="OpportunityMethods">
+    <apex:repeat value="{!getAllTheOpps}" var="record">
+        {!record.Name}
+    </apex:repeat>
+</apex:page>
+
+
+Classes and Collections
+----------------------------
+Lists and maps can be used with classes (List<Employee>) and interfaces, in the same ways that lists and maps 
+can be used with sObjects (List<Account>). This means, for example, that you can use a user-defined data type
+for the value or the key of a map
+
+
+
+
+public class Employee {
+    public String FullName;
+    public Integer myage;
+    public Boolean isEmpGood;
+    //parameterized constructor
+    public Employee(String name,Integer age,Boolean isGood){
+        FullName=name;
+        myage=age;
+        isEmpGood=isGood;
+    }
+    public void getDetails(){  
+        system.debug('FullName='+FullName+'myage='+myage+'Good= '+isEmpGood);
+    }
+    
+}
+
+Debug---> Execute anonynomous Window ------->
+----------------------------------------------
+//Create objects
+Employee emp1=new Employee('Sai',23,true);
+Employee emp2=new Employee('Nas',22,false);
+Employee emp3=new Employee('raj',24,true);
+//Store objects in empList
+//Each object is type of Employee class
+List<Employee> empList=new Employee[]{}; //[] it represents list
+empList.add(emp1);
+empList.add(emp2);
+empList.add(emp3);
+empList[1].getDetails();
+
+
+Output
+----------------------
+FullName=Nas myage=22 Good= false
+
+
+
+
