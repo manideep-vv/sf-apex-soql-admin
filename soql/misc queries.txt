@@ -1,0 +1,34 @@
+SELECT  AccountId, count(id),Account.name FROM Contact where isActive__c =true group by accountid, account.name
+-- select count(id) from contact where isactive__c=true ;
+
+
+alias demo
+
+
+trigger - update parent when child got updated
+group by in child table
+SELECT  AccountId, count(id) coun,Account.name FROM Contact where isActive__c =true group by accountid, account.name order by count(id) desc
+SELECT accountId, count(id) activeCount FROM Contact where isActive__c=true and accountid in  ('001dL00001h37t3QAA', '001dL00001kGBR7QAO') group by accountId 
+
+
+
+--------account table--------
+SELECT Id, name, AvgCaseResolutionDays__c FROM Account
+
+
+select accountid, Account.name, count(id) from contact where isactive__c=true group by accountid, Account.name
+
+total active in child table--  select count(id) from contact where isActive__c=true
+
+on account table
+
+summary in parent -- select name,activecontactscount__c  from account where activecontactscount__c >0
+total active in parent table ----- select sum(activecontactscount__c) from account where activecontactscount__c >0
+
+----cases table
+SELECT Id, CaseNumber, AccountId, ClosedDate, CreatedDate FROM Case
+select accountid, ClosedDate, CreatedDate  from case 
+
+
+
+
