@@ -1,0 +1,307 @@
+VS CODE SHORTCUTS - WINDOWS (SALESFORCE + APEX + LWC)
+1) to open keymap / existing shortcuts - (preference keyboardshortcuts or -- ctrl+shift+P -- search for keyboardshortcuts
+) type Press Ctrl+K Ctrl+S and select -- deploy and add ur shortcut
+i have added as ctrl+1 shortcut to deploy to org
+
+2) to see all options - Ctrl + Shift + P -- open command pallette- here u can search ur requirement like formating or open settings ...
+3) to see all existing setting -- ctrl+,
+4) to see settings.json file -  Ctrl + Shift + P and search  "open user settings" then settings.json will be installed
+
+plugins- apex helper formatter - to format the code
+1. BASIC EDITING
+- go back to previous file -- alt+left arrow
+- 1) To format code - alt+shift+F
+- to refactor - use F2- this is also same like intellij-- Shift+F6
+- Delete entire line: Ctrl + Shift + K
+- Cut entire line: Ctrl + X
+- Copy entire line: Ctrl + C
+- Duplicate line: Shift + Alt + DownArrow
+- Move line up/down: Alt + Up/DownArrow
+- Join lines: Ctrl + J
+- Insert line above: Ctrl + Shift + Enter
+- Insert line below: Ctrl + Enter
+--> create a new salesforce class -- Ctrl + Shift + P - type create new apex class 
+This is the BEST way because: It creates proper metadata files, It stores file in correct location, It maintains Salesforce project structure 
+--Renaming a class file - simple rename class name with  F2 shortcut- it will refactor all places like class name, file name, metadata file name
+1) using F2 shortcut - 1) rename class name  2) then .cls file name 3) <fullName> inside the -meta.xml file 
+all these 3 we should change and then deploy to org
+
+
+2. CURSOR & SELECTION & window
+- Select current line: Ctrl + L
+- Select current word: Ctrl + D
+- Select all occurrences: Ctrl + Shift + L
+- Add cursor (multi cursor): Alt + Click
+- Select to end: Shift + End
+- Select to beginning: Shift + Home
+- to maximise the window - ctrl + J
+- swap layout ordering - ctrl+E (cursor ai )- means left side project explorer will come into right side and u can swap each other
+
+3. SEARCH & NAVIGATION
+- go back to previous file -- alt+left arrow
+- how to move page up and down - Ctrl+ up arrow , Ctrl+ down
+- Search in file: Ctrl + F
+- Replace: Ctrl + H
+- Search entire project: Ctrl + Shift + F
+- Jump to file: Ctrl + P
+- Go to class/method: Ctrl + Shift + O
+- Open Explorer: Ctrl + Shift + E
+- Open terminal: Ctrl + `
+
+4. CODE FORMATTING ( see last lines to know how to install prettier and how to configure that plugin )
+- Format entire document: Shift + Alt + F or Ctrl + Shift + I → Format Document
+- Format selection: Shift + Alt + F
+- Enable Format on Save: Settings → 'Format on Save'
+
+
+5. SALESFORCE COMMANDS (with extensions installed)
+- Command Palette: Ctrl + Shift + P
+- Deploy file to org: Ctrl + Shift + P → SFDX: Deploy This Source to Org
+- Retrieve file: Ctrl + Shift + P → SFDX: Retrieve This Source
+- Run Anonymous Apex: Ctrl + Shift + P → SFDX: Execute Anonymous Apex
+- Open Default Org: Ctrl + Shift + P → SFDX: Open Default Org
+
+6. APEX-SPECIFIC HELPERS
+- Toggle comment: Ctrl + /
+- Block comment: Shift + Alt + A
+- Fold region: Ctrl + Shift + [
+- Unfold region: Ctrl + Shift + ]
+- Rename variable/method: F2
+- Find references: Shift + F12
+- Peek definition: Alt + F12
+- Go to definition: F12
+
+7. LWC / HTML
+- Wrap with tag: Alt + Shift + W
+- Emmet expand: Tab
+- Go to matching bracket: Ctrl + Shift + \\
+
+8. TABS & WINDOWS
+- New file: Ctrl + N
+- Close file: Ctrl + W
+- Next tab: Ctrl + Tab
+- Previous tab: Ctrl + Shift + Tab
+- Split editor: Ctrl + \\
+- Close editor group: Ctrl + K, W
+
+9. LARGE FILE NAVIGATION
+- Go to line: Ctrl + G
+- Toggle minimap: Ctrl + Shift + P → Minimap Toggle
+- Zoom in/out: Ctrl + + / Ctrl + -
+
+
+-------shortcuts in vs code -----
+note:- csp means Ctrl+Shift+P-
+1) to create project- search - create project with manifest  
+2) to create a comp	csp—create lightning web component 
+
+
+
+END OF SHORTCUT LIST
+
+org terminologies
+-------------------
+
+   
+ 
+
+errors -if u are not able to install - run this command to uninstall and re-install using command -- 
+
+ How to Fix the "Module Not Found" Error
+The most reliable fix is to "nuke" the old installation and install the modern CLI.
+
+1. Uninstall the Old SFDX CLI
+Via Control Panel: Go to Add or Remove Programs, find @salesforce/cli or Salesforce CLI, and uninstall it.
+
+Via Terminal: If you installed it via npm, run:
+
+Bash
+
+npm uninstall sfdx-cli --global
+2. Clean Up Corrupted Folders
+Delete these hidden configuration folders to ensure the "undefined" path error doesn't persist:
+
+C:\Users\Manideep\.config\sfdx
+
+C:\Users\Manideep\.config\sf
+
+C:\Users\Manideep\AppData\Local\sfdx (if it exists)
+
+3. Install the New Salesforce CLI (sf)
+The new executable is called sf, which is much faster and compatible with Node.js v22.
+
+Download the Installer: Get the Windows x64 installer from the official Salesforce CLI page.
+
+Alternative (npm): If you prefer using npm:
+
+Bash
+
+npm install @salesforce/cli --global
+4. Verify the Installation
+Open a new command prompt and run:
+
+Bash
+
+sf version
+Note: Even though you are using sf now, it includes an alias for sfdx. You can still type sfdx version, and it should now point to the new sf core without the "undefined" error.
+
+2) install 'Salesforce Extension Pack' plugin in vs code extensions
+3) to authorise an org - ctrl+Shift+P- authorize an org -- now our proj will be connected to org
+
+
+is node required for salesforce ?????
+-------
+The short answer is no, you do not need to install Node.js separately if you use the standard installers. However, it depends on how you choose to install the CLI.
+
+Here is a breakdown of the two scenarios:
+
+1. Using the Official Installer (Recommended)
+If you download and run the .exe (Windows) or .pkg (macOS) installer from the Salesforce CLI website, you do not need to install Node.js.
+
+Why? Salesforce bundles a specific, tested version of Node.js inside the installer itself.
+
+The Benefit: This version is dedicated only to the Salesforce CLI (sf). It won't interfere with any other Node.js versions you might have on your machine, preventing the "undefined module" error you saw earlier.
+
+2. Using npm (npm install -g @salesforce/cli)
+If you prefer to manage your tools via a package manager, you do need Node.js.
+
+Why? Since npm (Node Package Manager) is a part of Node.js, you must have Node.js installed first to run the command.
+
+The Risk: As you experienced, if your local Node.js version is too new or too old for the CLI version you are using, it can cause "Module Not Found" or compatibility crashes.
+
+how to push the code automatically to org on save
+------------------------
+settings- search -- deploy on save -- enable (then whenever u save code , then automatically code will be pushed to org)
+
+
+how to create a new project  from vs code
+------------
+1) ctrl +Shift+P -- sfdx: create project  (note salesforce cli is doing the project creation, like deploy to org, everything is done by salesforce cli only not vs code)
+
+to bring source code from org to local
+--------------------------------------------
+1) in vs code - click left side salesforce cloud icon - select any class- click button called retrieve source from org- then that class or trigger will be downloaded to ur local folder
+2) u can bring entire folder of classes at once also 
+
+how to configure those formatter plugins and to format the code
+===========================================================================
+
+
+
+STEP 1: Check Java (MOST COMMON ISSUE)
+
+Apex Language Server requires Java 11 or 17.
+
+Open Command Prompt and run:
+
+java -version
+
+
+✔ You must see Java 11 or Java 17
+
+❌ If you see:
+
+Java 8
+
+Or “java not recognized”
+
+👉 Install Java 11 (recommended)
+👉 Set JAVA_HOME
+
+Example:
+
+JAVA_HOME = C:\Program Files\Java\jdk-11
+
+
+Restart VS Code after this.
+
+⚠️ This alone fixes 70% of cases.
+
+🔹 STEP 2: Verify Salesforce CLI + Plugins
+
+Run:
+
+sfdx --version
+
+
+Then:
+
+sfdx plugins
+
+
+You MUST see:
+
+@salesforce/sfdx-scanner
+
+
+If missing, install:
+
+sfdx plugins:install @salesforce/sfdx-scanner
+
+🔹 STEP 3: Restart Apex Language Server (correct way)
+
+In VS Code:
+
+Ctrl + Shift + P → run ONE BY ONE:
+
+SFDX: Restart Apex Language Server
+SFDX: Refresh SObject Definitions
+
+
+Wait 60 seconds.
+Do NOT type during this time.
+
+🔹 STEP 4: Reload VS Code Window
+
+Ctrl + Shift + P
+
+Reload Window
+
+🔹 STEP 5: Ensure file is inside SFDX project
+
+Your Apex file MUST be under:
+
+force-app/main/default/classes
+
+
+If file is outside → IntelliSense will NEVER work.
+
+🔹 STEP 6: Confirm file type is Apex
+
+Bottom-right of VS Code must show:
+
+Apex
+
+
+If it shows Plain Text:
+
+Click it
+
+Select Apex
+
+✅ After FIX — Expected Behavior
+
+When you type:
+
+System.
+
+
+ 
+
+If you don’t → Language Server is still down.
+
+ "[apex]": {
+    "editor.defaultFormatter": "salesforce.salesforcedx-vscode"
+  },
+
+  "[html]": {
+    "editor.defaultFormatter": "vscode.html-language-features"
+  },
+
+  "[javascript]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+
+  "[css]": {
+    "editor.defaultFormatter": "vscode.css-language-features"
+  },
