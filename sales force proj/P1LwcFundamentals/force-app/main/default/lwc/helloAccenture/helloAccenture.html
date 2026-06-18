@@ -1,0 +1,16 @@
+<template>
+    <h1> welcome to dell cars </h1>
+    <p> our locations are {cityName} </p>
+
+    <lightning-card title="Hello ">
+        <div class="slds-m-top_medium slds-m-bottom_x-large slds-m-around_xx-large">
+            <div class="slds-box">Your city name is-- {cityName}</div>
+            <div class="slds-p-around_medium lgc-bg">
+                <lightning-input type="text" label="Enter your Name" onkeyup={updatePersonalDetails}></lightning-input>
+                <lightning-input type="text" label="Enter your city Name" onkeyup={updateCityName}></lightning-input>
+            </div>
+            <div class="slds-box">You have entered your name as {user.name}</div>
+            <div class="slds-box">You have entered your city name as {cityName}</div>
+        </div>
+    </lightning-card>
+</template>

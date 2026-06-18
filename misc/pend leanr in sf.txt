@@ -67,3 +67,66 @@ loosage
 for 120 days i should have studied 360 hours , but studied 200 hours 
 means daily i am studying 1.5 hours only 
 
+why i am not switching to salesforce project in ameriprise now (18-march-2026)
+--------------------------
+after 1 working in sf project in ampf  - to get 24LPA i should claim myself as 6 years sf developer-- which is risky hence dropping my plan as sf  developer
+for 3y they are giving me only 13LPA max
+
+What Most People Do (Smart Approach)
+
+People in your situation usually:
+
+👉 First switch company as Java developer (₹25 LPA)
+👉 Then move to Salesforce internally
+
+This avoids:
+
+Salary drop ❌
+
+Time pressure ❌
+
+Risk ❌
+
+⚠️ Risk of Taking Salesforce Now
+
+If you take Salesforce project:
+
+You delay switch by ~1 year
+
+Salary stays ₹18–19 LPA
+
+Still beginner in Salesforce
+
+✅ When Taking Salesforce NOW Makes Sense
+
+Only choose Salesforce project if:
+
+✔ You are okay waiting 1 year
+✔ You are interested in Salesforce long-term
+✔ You don’t mind delaying salary growth
+
+🔥 My Honest Recommendation (Based on Your Situation)
+
+You already said:
+
+“I don’t want to spend 1 year more”
+
+👉 Then don’t take Salesforce project now
+
+Instead:
+
+1️⃣ Switch as Java developer (₹25 LPA)
+2️⃣ Later internally move to Salesforce
+
+🚀 Best Strategy For You
+Step 1 (Next 3–4 months)
+
+Prepare Java + React
+
+Switch company
+
+Step 2 (After joining new company)
+
+Continue Salesforce learning (30 min/day)
+
+Try internal transfer

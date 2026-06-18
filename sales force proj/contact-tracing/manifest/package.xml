@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <types>
+        <members>CTLocationController</members>
+        <members>CTLocationTracingController</members>
+        <members>CTPeopleTracingController</members>
+        <members>CTPersonController</members>
+        <name>ApexClass</name>
+    </types>
+    <types>
+        <members>Contact_Tracing</members>
+        <name>CustomApplication</name>
+    </types>
+    <types>
+        <members>Location_Tracing__c</members>
+        <members>Location__c</members>
+        <members>People_Tracing__c</members>
+        <members>Person__c</members>
+        <name>CustomObject</name>
+    </types>
+    <types>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Location_Tracing__c</members>
+        <members>Location__c</members>
+        <members>People_Tracing__c</members>
+        <members>Person__c</members>
+        <name>CustomTab</name>
+    </types>
+    <types>
+        <members>Contact_Tracing_UtilityBar</members>
+        <name>FlexiPage</name>
+    </types>
+    <types>
+        <members>Location_Tracing__c-Location Tracing Layout</members>
+        <members>Location__c-Location Layout</members>
+        <members>People_Tracing__c-People Tracing Layout</members>
+        <members>Person__c-Person Layout</members>
+        <name>Layout</name>
+    </types>
+    <types>
+        <name>ListView</name>
+    </types>
+    <types>
+        <members>Health_Admin</members>
+        <name>PermissionSet</name>
+    </types>
+    <version>64.0</version>
+</Package>

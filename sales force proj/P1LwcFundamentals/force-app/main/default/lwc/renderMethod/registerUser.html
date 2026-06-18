@@ -1,0 +1,18 @@
+<template>
+    <lightning-card title="User Registration page">
+        <div class="slds-m-top_medium slds-m-bottom_x-large slds-m-around_small">
+
+            <lightning-input type="text" label="First Name"></lightning-input>
+            <lightning-input type="text" label="Last Name"></lightning-input>
+            <lightning-input type="email" label="Enter your email"></lightning-input>
+            <lightning-input type="Password" label="Enter your desired password"></lightning-input>
+
+            <lightning-button variant="destructive" label="Cancel Registration" title="Destructive action"
+                onclick={handleClick} class="slds-m-left_x-small"></lightning-button>
+
+            <lightning-button variant="success" label="Register" onclick={LoginOrRegisterActions} title="Successful action"
+                class="slds-m-left_x-small"></lightning-button>
+        </div>
+    </lightning-card>
+
+</template>

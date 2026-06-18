@@ -1,0 +1,42 @@
+<template>
+        <!-- <template for:each={newJoinersList} for:item="item">
+            <div key={item.Name}>
+                Hello {item.Name}, your roll number is {item.id} and your age is {item.Age}
+            </div>
+
+        </template> -->
+
+        <!-- <lightning-carousel disable-auto-scroll> 
+            <template for:each={carouselImgDetails} for:item="eachImage">
+                <lightning-carousel-image key={eachImage.description} 
+                    src={eachImage.src}
+                    description={eachImage.description}
+                    href={eachImage.href}>
+                </lightning-carousel-image>
+            </template>
+        </lightning-carousel> -->
+
+<div class="slds-var-m-around_medium">
+
+        <div style="height:300px">
+
+            <lightning-carousel disable-auto-scroll>
+
+                <template for:each={carouselImgDetails} for:item="item">
+
+                    <lightning-carousel-image
+                        key={item.src}
+                        src={item.src}
+                        header={item.header}
+                        description={item.description}>
+                    </lightning-carousel-image>
+
+                </template>
+
+            </lightning-carousel>
+
+        </div>
+
+    </div>
+        last line of html
+</template>

@@ -1,0 +1,18 @@
+<template>
+
+<div >
+    <lightning-button variant="destructive" label="Show Modal" onclick={afterClickingModal}></lightning-button>
+    <template if:true={showModalFromChild}>
+        <c-c2p-child-modal-comp onsenddataeventfromchild={anyParentJsMethodToCloseAlert} ></c-c2p-child-modal-comp>
+    </template>
+    <h2 class="slds-text-heading_medium" >got Latest News from child as----- {latestNews}</h2>
+</div>
+
+<div onsenddataevernfromchild2={handlecloseEventFromc2}>
+<lightning-button variant="success" label="Show Modal With Bubbling" onclick={afterClickingModalWithBubbling}></lightning-button>
+  <template if:true={showModalFromChild2}>
+    <c-c2p-child-comp-with-bubbling > </c-c2p-child-comp-with-bubbling>
+  </template>
+  <h2 class="slds-text-heading_medium" >got Latest News from child as----- {latestNewsFromc2}</h2>
+</div>
+</template>

@@ -1,0 +1,28 @@
+<template>
+    <lightning-card title="I am a parent comp card">
+        <div class="slds-m-top_medium slds-m-bottom_x-large slds-m-around_small">
+            <!-- here passing arg means parent is calling child comp with some data -->
+            <c-p2c-child-alert-comp daily-study-progress='your daily study progress is very very poor'
+            message-to-user="Atleast you must study daily for 3 hours to be a salesforce developer"
+            
+            ></c-p2c-child-alert-comp>
+
+            <c-p2c-child-empcomp new-joiners-list={employeeData} carousel-img-details={carouselData}> 
+
+            </c-p2c-child-empcomp>
+
+            <!-- now in my parent comp , i am including a child progress bar comp 
+            steps 1) when in enter num then this parent js variable will be updated then with updated value we will call child comp 
+            2) when child js variable is updated then child html progress bar will be updated  with new value then progress bar changes 
+            this is how data will flow from parent to child and child to parent on an action in parent component 
+            -->
+        <lightning-input  type="number" label="Enter marks from 0-100 " onchange={updateMarks}>  </lightning-input>
+        <!-- here we are calling the child comp whenever input changes -->
+        <c-p2c-child-progress-bar-comp latest-pass-percentage={totalMarks} >    </c-p2c-child-progress-bar-comp>
+
+        <lightning-input  type="number" label="Enter how many litres of water wasted 0-100 " onchange={updateWaterWastageLitres}>  </lightning-input>
+        <c-p2c-child-slider-comp water-wastage-in-litres="10"  >    </c-p2c-child-slider-comp>
+
+        </div>
+    </lightning-card>
+</template>

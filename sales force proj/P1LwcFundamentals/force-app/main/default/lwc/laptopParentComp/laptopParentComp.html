@@ -1,0 +1,26 @@
+<template>
+    <lightning-card title="Laptop Parent Comp">
+        <div class="slds-vaslds-var-m-around_medium goldBorder">
+            <span class="slds-text-heading_large "> Lenovo laptop - an successful path for your career </span>
+            <lightning-input type="text" label="Enter your laptop name" onkeyup={changeHandler}>
+
+            </lightning-input>
+            <div> your selected laptop name is {brandName} </div>
+        </div>
+    </lightning-card>
+
+    <!-- if visible then show hide button and show the child component, when u click hide existing comp will be removed
+     then disconnectedCallback() will be called  -->
+    <template if:true={isChildVisible}>
+        <lightning-button class="slds-m-left_x-small" variant="destructive" label="Hide child Component"
+            onclick={toggleVisibility}></lightning-button>
+        <c-ram-child-comp></c-ram-child-comp>
+    </template>
+
+    <template if:false={isChildVisible}>
+        <lightning-button variant="success" label="Show child Component" onclick={toggleVisibility}></lightning-button>
+    </template>
+
+
+
+</template>

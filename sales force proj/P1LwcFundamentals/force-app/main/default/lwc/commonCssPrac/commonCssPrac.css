@@ -1,0 +1,10 @@
+.blackBorder{
+    border: 2px dashed rgb(118, 236, 20);
+
+}
+.goldBorder{
+    border: 2px dashed gold;
+}
+.violetBorder{
+    border: 2px dashed violet;
+}

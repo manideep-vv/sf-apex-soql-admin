@@ -1,0 +1,7 @@
+.mani{
+    background-color: rgb(255, 238, 0);
+    
+}
+.mani:hover{
+    border: 1px dashed orange;
+}

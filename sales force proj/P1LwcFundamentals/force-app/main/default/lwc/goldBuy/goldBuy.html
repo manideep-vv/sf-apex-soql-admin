@@ -1,0 +1,55 @@
+<template>
+
+    <lightning-card title="Gold Buy-Getter method Demo ">
+        <div class="slds-m-top_medium slds-m-bottom_x-large slds-m-around_xx-large">
+            <div class="slds-box blackBorder">Todays gold rate is -- {todayGoldPrice}</div>
+            <lightning-input type="number" label="Enter Units" onkeyup={updateUnits}></lightning-input>
+            <div class="slds-box">Entered units -- {units}</div>
+            <!-- since we cant write expression {units*todayGoldPrice} we wrote this in a getter method and calling that -->
+            <div class="slds-box">Required margin is -- {totalBill}</div>
+        </div>
+    </lightning-card>
+
+    <lightning-card title="if-templateDemo">
+        <lightning-button variant="success" label="Show BuyingOptions" onclick={showOptions} title="Successful action"
+            class="slds-m-left_x-small"></lightning-button>
+        <lightning-button variant="destructive" label="Hide BuyingOptions" onclick={hideOptions}
+            title="Destructive action" class="slds-m-left_x-small"></lightning-button>
+
+        <template if:true={doesShowOptions}>
+            <div class="slds-box">{options}</div>
+        </template>
+        <!-- here inside template we can call getter methods also  -->
+        <template if:true={showCoupouns}>
+            <div class="slds-box">Hello Dear Retail user - use code "TATA" to get additional 10% off</div>
+        </template>
+    </lightning-card>
+     
+    <lightning-card title="Including a child comp">
+        <!-- <c-silver-txns> </c-silver-txns> -->
+     </lightning-card>
+    
+
+    <lightning-card title="For Each Demo ">
+        <div class="slds-var-m-around_medium">
+            <ul class="slds-has-dividers_around-space">
+                <template for:each={goldShopsList} for:item="shop" for:index="index">
+                    <li key={shop.name} class="slds-item"> <strong>{shop.name} Branch-- {index} </strong> is located in
+                        {shop.address} </li>
+                </template>
+            </ul>
+        </div>
+    </lightning-card>
+
+    <lightning-card title="iterator Demo">
+        <!-- remove this margin and check  -->
+        <div class="slds-var-m-around_medium">
+            <ul class="slds-has-dividers_around-space">
+                <template iterator:itr={goldShopsList}>
+                    <li key={itr.value.name} class="slds-item"> {itr.index} .<strong> {itr.value.name} is located in
+                            {itr.value.address} </strong> </li>
+                </template>
+            </ul>
+        </div>
+    </lightning-card>
+</template>
